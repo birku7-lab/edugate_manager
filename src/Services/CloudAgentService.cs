@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Web.Script.Serialization;
 using SoftBuilt.PHPShield.Models;
 
@@ -31,9 +31,52 @@ namespace SoftBuilt.PHPShield.Services
     public class CloudAgentService
     {
         private static CloudAgentService _instance;
-        public static CloudAgentService Instance => _instance ?? (_instance = new CloudAgentService());
+        public static CloudAgentService Instance
+        {
+            get
+            {
+                if (_instance == null) _instance = new CloudAgentService();
+                return _instance;
+            }
+        }
 
         private readonly JavaScriptSerializer _json = new JavaScriptSerializer();
+        private Timer _heartbeatTimer;
+        private bool _isHeartbeatRunning = false;
+
+        public event Action<bool, string> LockStatusChanged;
+        public event Action<CloudUpdatePayload> UpdateAvailable;
+
+        static CloudAgentService()
+        {
+            // Ensure TLS 1.2 is enabled for modern HTTPS endpoints like Render
+            try
+            {
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            }
+            catch { }
+        }
+
+        public void StartHeartbeatLoop(int intervalSeconds = 60)
+        {
+            if (_heartbeatTimer != null) return;
+
+            // Run first check after 2 seconds, then every intervalSeconds (default 60s)
+            _heartbeatTimer = new Timer(delegate
+            {
+                if (_isHeartbeatRunning) return;
+                _isHeartbeatRunning = true;
+                try
+                {
+                    string err;
+                    SendHeartbeat(out err);
+                }
+                finally
+                {
+                    _isHeartbeatRunning = false;
+                }
+            }, null, 2000, intervalSeconds * 1000);
+        }
 
         public string GetMachineFingerprint()
         {
@@ -82,7 +125,7 @@ namespace SoftBuilt.PHPShield.Services
                 var req = (HttpWebRequest)WebRequest.Create(endpoint);
                 req.Method = "POST";
                 req.ContentType = "application/json";
-                req.Timeout = 6000;
+                req.Timeout = 15000; // Allow 15s in case Render instance is spinning up
                 req.ContentLength = data.Length;
 
                 using (var stream = req.GetRequestStream())
@@ -99,9 +142,31 @@ namespace SoftBuilt.PHPShield.Services
                     if (result != null)
                     {
                         bool isLocked = string.Equals(result.status, "locked", StringComparison.OrdinalIgnoreCase);
+                        string reason = result.lock_reason ?? "";
+
+                        bool lockStateChanged = (settings.RemoteLockActive != isLocked) || (settings.RemoteLockReason != reason);
                         settings.RemoteLockActive = isLocked;
-                        settings.RemoteLockReason = result.lock_reason ?? "";
-                        SettingsService.Instance.Save();
+                        settings.RemoteLockReason = reason;
+
+                        if (lockStateChanged)
+                        {
+                            SettingsService.Instance.Save();
+                            AuditLogService.Instance.Log("CLOUD", "Remote Status", 
+                                isLocked ? "System locked remotely by developer: " + reason : "System marked active by developer.", isLocked);
+                            
+                            if (LockStatusChanged != null)
+                            {
+                                LockStatusChanged(isLocked, reason);
+                            }
+                        }
+
+                        if (result.update != null && result.update.available)
+                        {
+                            if (UpdateAvailable != null)
+                            {
+                                UpdateAvailable(result.update);
+                            }
+                        }
                     }
 
                     return result;
@@ -139,7 +204,7 @@ namespace SoftBuilt.PHPShield.Services
                 var req = (HttpWebRequest)WebRequest.Create(endpoint);
                 req.Method = "POST";
                 req.ContentType = "application/json";
-                req.Timeout = 5000;
+                req.Timeout = 8000;
                 req.ContentLength = data.Length;
 
                 using (var stream = req.GetRequestStream())

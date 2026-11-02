@@ -269,7 +269,7 @@ namespace SoftBuilt.PHPShield.Models
             ClientAppTitle = "EduGate School Management System";
             XamppDbUser = "root";
             XamppDbPassword = "";
-            CloudDashboardUrl = "http://127.0.0.1:5000";
+            CloudDashboardUrl = "https://edugate-manager-3.onrender.com";
             SchoolId = "SCH-EDUGATE-01";
             SchoolName = "Main Demonstration School";
             RemoteLockActive = false;

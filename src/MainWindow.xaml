@@ -763,6 +763,33 @@
                                     <TextBox x:Name="TxtSettingSchoolPin" Grid.Column="1" Text="1234"/>
                                 </Grid>
 
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Cloud Dashboard URL:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtSettingCloudUrl" Grid.Column="1" Text="https://edugate-manager-3.onrender.com"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="School System ID:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtSettingSchoolId" Grid.Column="1" Text="SCH-EDUGATE-01"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="School Name:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtSettingSchoolName" Grid.Column="1" Text="Main Demonstration School"/>
+                                </Grid>
+
                                 <Grid Margin="0,0,0,16">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -772,7 +799,11 @@
                                     <CheckBox x:Name="ChkSettingLan" Grid.Column="1" Content="Enable LAN Network Access (Approval Required)" Margin="0,0,0,8"/>
                                 </Grid>
 
-                                <Button Content="💾 Save Settings" Style="{StaticResource SuccessButton}" Click="BtnSaveSettings_Click" HorizontalAlignment="Left" Padding="16,8"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Button Content="💾 Save Settings" Style="{StaticResource SuccessButton}" Click="BtnSaveSettings_Click" Padding="16,8" Margin="0,0,12,0"/>
+                                    <Button Content="📡 Test Cloud &amp; Send Heartbeat" Style="{StaticResource SecondaryButton}" Click="BtnTestCloudHeartbeat_Click" Padding="14,8" Margin="0,0,12,0"/>
+                                    <TextBlock x:Name="TxtCloudHeartbeatStatus" VerticalAlignment="Center" FontSize="11" Foreground="#94A3B8"/>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
 
@@ -1096,6 +1127,33 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Cancel" Style="{StaticResource SecondaryButton}" Click="BtnCancelDbAuth_Click" Margin="0,0,8,0" Padding="14,8"/>
                         <Button Content="Verify &amp; Unlock DB Settings" Style="{StaticResource WarningButton}" Click="BtnVerifyDbAuth_Click" Padding="18,8"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ================= DEVELOPER REMOTE LOCK OVERLAY ================= -->
+        <Grid x:Name="ModalRemoteLock" Grid.Column="0" Grid.ColumnSpan="2" Background="#F5000000" Visibility="Collapsed">
+            <Border Background="#111827" BorderBrush="#DC2626" BorderThickness="2" CornerRadius="16" Width="560" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="32">
+                <StackPanel HorizontalAlignment="Center">
+                    <Border Width="80" Height="80" CornerRadius="40" Background="#7F1D1D" BorderBrush="#EF4444" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,20">
+                        <TextBlock Text="🔒" FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="SYSTEM REMOTELY SUSPENDED" FontSize="20" FontWeight="Bold" Foreground="#EF4444" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                    <TextBlock x:Name="TxtRemoteLockSchoolHeader" Text="EduGate School Management System" FontSize="14" FontWeight="SemiBold" Foreground="#E2E8F0" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+
+                    <Border Background="#1F2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,20">
+                        <StackPanel>
+                            <TextBlock Text="Reason for Suspension:" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" Margin="0,0,0,6"/>
+                            <TextBlock x:Name="TxtRemoteLockReasonMessage" Text="System access has been suspended by the developer. Please contact support or clear pending licensing requirements to restore system access." FontSize="13" Foreground="#FCA5A5" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="Cloud Server: https://edugate-manager-3.onrender.com" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="🔄 Check Status / Refresh Lock" Style="{StaticResource SuccessButton}" Click="BtnRefreshRemoteLock_Click" Padding="18,10" Margin="0,0,12,0" FontSize="13" FontWeight="Bold"/>
+                        <Button Content="🛠️ Developer Override" Style="{StaticResource SecondaryButton}" Click="BtnRemoteLockDevOverride_Click" Padding="14,10" FontSize="12"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

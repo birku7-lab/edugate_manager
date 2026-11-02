@@ -49,6 +49,26 @@ namespace SoftBuilt.PHPShield.Services
                 Settings.VaultPath = StorageManager.VaultDirectory;
                 Save();
             }
+            else
+            {
+                bool dirty = false;
+                if (string.IsNullOrEmpty(Settings.CloudDashboardUrl) || Settings.CloudDashboardUrl.Contains("127.0.0.1:5000") || Settings.CloudDashboardUrl.Contains("localhost:5000"))
+                {
+                    Settings.CloudDashboardUrl = "https://edugate-manager-3.onrender.com";
+                    dirty = true;
+                }
+                if (string.IsNullOrEmpty(Settings.SchoolId))
+                {
+                    Settings.SchoolId = "SCH-EDUGATE-01";
+                    dirty = true;
+                }
+                if (string.IsNullOrEmpty(Settings.SchoolName))
+                {
+                    Settings.SchoolName = "Main Demonstration School";
+                    dirty = true;
+                }
+                if (dirty) Save();
+            }
         }
 
         public void Save()

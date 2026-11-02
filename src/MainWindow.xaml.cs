@@ -43,6 +43,21 @@ namespace SoftBuilt.PHPShield
             TxtSettingDevPasscode.Text = settings.DeveloperPasscode ?? "2026";
             TxtSettingSchoolPin.Text = settings.SchoolPin ?? "1234";
 
+            // Cloud Fleet Settings
+            TxtSettingCloudUrl.Text = settings.CloudDashboardUrl ?? "https://edugate-manager-3.onrender.com";
+            TxtSettingSchoolId.Text = settings.SchoolId ?? "SCH-EDUGATE-01";
+            TxtSettingSchoolName.Text = settings.SchoolName ?? "Main Demonstration School";
+
+            // Wire Cloud Agent events and loop
+            CloudAgentService.Instance.LockStatusChanged += OnCloudLockStatusChanged;
+            CloudAgentService.Instance.UpdateAvailable += OnCloudUpdateAvailable;
+            CloudAgentService.Instance.StartHeartbeatLoop(60);
+
+            if (settings.RemoteLockActive)
+            {
+                ApplyRemoteLockUI(true, settings.RemoteLockReason);
+            }
+
             // ── Robustness: admin privilege check ──────────────────────────────
             if (!XamppDetectorService.IsRunningAsAdmin())
             {
@@ -753,6 +768,9 @@ namespace SoftBuilt.PHPShield
             s.EnableLan = ChkSettingLan.IsChecked == true;
             if (TxtSettingDevPasscode != null) s.DeveloperPasscode = TxtSettingDevPasscode.Text.Trim();
             if (TxtSettingSchoolPin != null) s.SchoolPin = TxtSettingSchoolPin.Text.Trim();
+            if (TxtSettingCloudUrl != null) s.CloudDashboardUrl = TxtSettingCloudUrl.Text.Trim();
+            if (TxtSettingSchoolId != null) s.SchoolId = TxtSettingSchoolId.Text.Trim();
+            if (TxtSettingSchoolName != null) s.SchoolName = TxtSettingSchoolName.Text.Trim();
 
             SettingsService.Instance.Save();
             SettingsService.Instance.EnsureDirectories();
@@ -1446,6 +1464,142 @@ namespace SoftBuilt.PHPShield
             {
                 MessageBox.Show("Error importing database: " + ex.Message, "Import Exception", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        // ================= CLOUD FLEET & REMOTE LOCK =================
+        private void OnCloudLockStatusChanged(bool isLocked, string reason)
+        {
+            Dispatcher.Invoke(new Action(() =>
+            {
+                ApplyRemoteLockUI(isLocked, reason);
+            }));
+        }
+
+        private void OnCloudUpdateAvailable(CloudUpdatePayload update)
+        {
+            Dispatcher.Invoke(new Action(() =>
+            {
+                AuditLogService.Instance.Log("CLOUD", "Update Available", string.Format("Developer released update '{0}' v{1}", update.title, update.version), true);
+            }));
+        }
+
+        private void ApplyRemoteLockUI(bool isLocked, string reason)
+        {
+            if (isLocked)
+            {
+                var s = SettingsService.Instance.Settings;
+                TxtRemoteLockSchoolHeader.Text = string.Format("{0} ({1})", s.SchoolName ?? "EduGate System", s.SchoolId ?? "SCH-EDUGATE-01");
+                TxtRemoteLockReasonMessage.Text = !string.IsNullOrEmpty(reason) ? reason : "System access has been suspended by the developer. Please contact support or your provider to restore system access.";
+                ModalRemoteLock.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                ModalRemoteLock.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void BtnTestCloudHeartbeat_Click(object sender, RoutedEventArgs e)
+        {
+            TxtCloudHeartbeatStatus.Text = "Connecting to cloud...";
+            TxtCloudHeartbeatStatus.Foreground = new SolidColorBrush(Color.FromRgb(148, 163, 184));
+
+            System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+            {
+                string err;
+                var resp = CloudAgentService.Instance.SendHeartbeat(out err);
+
+                Dispatcher.Invoke(new Action(() =>
+                {
+                    if (resp != null)
+                    {
+                        bool isLocked = string.Equals(resp.status, "locked", StringComparison.OrdinalIgnoreCase);
+                        TxtCloudHeartbeatStatus.Text = string.Format("Connected • Status: {0}", resp.status.ToUpper());
+                        TxtCloudHeartbeatStatus.Foreground = isLocked ? 
+                            new SolidColorBrush(Color.FromRgb(239, 68, 68)) : 
+                            new SolidColorBrush(Color.FromRgb(16, 185, 129));
+
+                        ApplyRemoteLockUI(isLocked, resp.lock_reason);
+
+                        MessageBox.Show(string.Format("Successfully communicated with Cloud Dashboard!\n\nStatus: {0}\nSchool ID: {1}\nServer Time: {2}",
+                            resp.status.ToUpper(), resp.school_id, resp.server_time), "Cloud Connection Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        TxtCloudHeartbeatStatus.Text = "Connection Failed";
+                        TxtCloudHeartbeatStatus.Foreground = new SolidColorBrush(Color.FromRgb(239, 68, 68));
+                        MessageBox.Show("Could not reach Cloud Dashboard:\n" + err, "Cloud Connection Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }));
+            });
+        }
+
+        private void BtnRefreshRemoteLock_Click(object sender, RoutedEventArgs e)
+        {
+            System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+            {
+                string err;
+                var resp = CloudAgentService.Instance.SendHeartbeat(out err);
+
+                Dispatcher.Invoke(new Action(() =>
+                {
+                    if (resp != null)
+                    {
+                        bool isLocked = string.Equals(resp.status, "locked", StringComparison.OrdinalIgnoreCase);
+                        ApplyRemoteLockUI(isLocked, resp.lock_reason);
+                        if (!isLocked)
+                        {
+                            MessageBox.Show("School system lock has been cleared! System is now active.", "System Unlocked", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("System is still locked by the developer:\n" + resp.lock_reason, "Still Locked", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Unable to reach cloud server to verify lock status:\n" + err, "Connection Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }));
+            });
+        }
+
+        private void BtnRemoteLockDevOverride_Click(object sender, RoutedEventArgs e)
+        {
+            var prompt = new Window
+            {
+                Title = "Developer Emergency Override",
+                Width = 360,
+                Height = 180,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                Background = new SolidColorBrush(Color.FromRgb(31, 41, 55)),
+                ResizeMode = ResizeMode.NoResize
+            };
+
+            var stack = new StackPanel { Margin = new Thickness(20) };
+            stack.Children.Add(new TextBlock { Text = "Enter Developer Master Passcode to override lock:", Foreground = Brushes.White, Margin = new Thickness(0, 0, 0, 10), TextWrapping = TextWrapping.Wrap });
+            var passBox = new PasswordBox { Margin = new Thickness(0, 0, 0, 15), Padding = new Thickness(6) };
+            stack.Children.Add(passBox);
+
+            var btnOk = new Button { Content = "Unlock Override", Padding = new Thickness(12, 6, 12, 6) };
+            btnOk.Click += (s, args) =>
+            {
+                string masterCode = SettingsService.Instance.Settings.DeveloperPasscode ?? "2026";
+                if (passBox.Password == masterCode)
+                {
+                    SettingsService.Instance.Settings.RemoteLockActive = false;
+                    SettingsService.Instance.Save();
+                    ModalRemoteLock.Visibility = Visibility.Collapsed;
+                    prompt.Close();
+                    MessageBox.Show("Emergency developer override accepted. Lock temporarily lifted.", "Override Accepted", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Invalid developer passcode.", "Access Denied", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            };
+            stack.Children.Add(btnOk);
+            prompt.Content = stack;
+            prompt.ShowDialog();
         }
     }
 }
