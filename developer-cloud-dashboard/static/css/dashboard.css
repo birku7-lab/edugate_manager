@@ -1,0 +1,139 @@
+:root {
+    --bg-main: #0B0F19;
+    --bg-surface: #111827;
+    --border-color: #1F2937;
+    --primary-accent: #6366F1;
+    --primary-accent-hover: #4F46E5;
+    --success-accent: #10B981;
+    --warning-accent: #F59E0B;
+    --danger-accent: #EF4444;
+    --info-accent: #38BDF8;
+}
+
+body {
+    background-color: var(--bg-main) !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #E2E8F0;
+    min-height: 100vh;
+}
+
+.bg-surface {
+    background-color: var(--bg-surface) !important;
+}
+
+.text-primary-accent {
+    color: var(--primary-accent) !important;
+}
+
+.text-info-accent {
+    color: var(--info-accent) !important;
+}
+
+.brand-badge {
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.brand-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(16, 185, 129, 0.2));
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+}
+
+.fs-8 {
+    font-size: 0.75rem !important;
+}
+
+.tracking-wider {
+    letter-spacing: 0.05em;
+}
+
+.min-vh-75 {
+    min-height: 75vh;
+}
+
+/* Metric Cards */
+.metric-card {
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(99, 102, 241, 0.4) !important;
+}
+
+.metric-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Pulse live indicator */
+.pulse-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10B981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* Table styling */
+.table-dark-header th {
+    background-color: #0F172A !important;
+    color: #94A3B8;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color) !important;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.table-dark td {
+    background-color: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding-top: 14px;
+    padding-bottom: 14px;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0B0F19;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1F2937;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #374151;
+}

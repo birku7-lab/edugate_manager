@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Logs - EduGate School System</title>
+    <link rel="stylesheet" href="css/style.css?v=2.0">
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="js/config.js?v=2.0" defer></script>
+    <script src="js/app.js?v=1.9" defer></script>
+    <script src="js/sms_logs.js?v=1.0" defer></script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ph ph-graduation-cap"></i></div>
+            <div class="sidebar-header-text"><h2>EduGate</h2><p>School System</p></div>
+        </div>
+        <div class="sidebar-scroll">
+            <div class="nav-section">
+                <div class="nav-section-title">MANAGEMENT</div>
+                <ul class="sidebar-menu">
+                    <li><a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a></li>
+                    <li><a href="students.html"><i class="ph ph-users-three"></i> Students</a></li>
+                    <li><a href="add_student.html"><i class="ph ph-plus-circle"></i> Add Student</a></li>
+                    <li><a href="scanner.html"><i class="ph ph-scan"></i> Attendance Scanner</a></li>
+                    <li><a href="records.html"><i class="ph ph-list-dashes"></i> Attendance Records</a></li>
+                    <li><a href="reports.html"><i class="ph ph-file-text"></i> Reports</a></li>
+                </ul>
+            </div>
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">FINANCE</div>
+                <ul class="sidebar-menu">
+                    <li><a href="billing.html"><i class="ph ph-currency-circle-dollar"></i> Billing</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="communication.html#tab-sms"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="communication.html#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="communication.html#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                    <li><a href="sms_logs.html"><i class="ph ph-list"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">OTHER</div>
+                <ul class="sidebar-menu">
+                    <li><a href="settings.html"><i class="ph ph-gear"></i> Settings</a></li>
+                    <li><a href="staff.html"><i class="ph ph-user-gear"></i> Staff Management</a></li>
+                    <li class="active"><a href="sms_logs.html"><i class="ph ph-chat-text"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=4f46e5&color=fff" alt="Admin">
+            <div class="sidebar-footer-info"><h4>Admin User</h4><p>Administrator</p></div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="top-header">
+            <div class="header-left">
+                <button class="mobile-toggle"><i class="ph ph-list"></i></button>
+                <div>
+                    <h1><i class="ph ph-chat-text" style="color:var(--primary);vertical-align:middle;"></i> SMS Logs</h1>
+                    <p>View sent SMS messages to parents/guardians</p>
+                </div>
+            </div>
+            <div class="header-right" style="display:flex;gap:0.75rem;align-items:center;">
+                <input type="text" id="sms-search" class="form-control" placeholder="Search logs..." style="min-width:250px;">
+                <button class="btn btn-primary" onclick="loadSMSLogs()">
+                    <i class="ph ph-arrows-clockwise"></i> Refresh
+                </button>
+                <button class="btn btn-danger" onclick="deleteAllSMSLogs()" style="background:#ef4444;border-color:#ef4444;color:white;">
+                    <i class="ph ph-trash"></i> Delete All
+                </button>
+            </div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+            <div class="table-responsive" style="overflow-x:auto;">
+                <table id="sms-logs-table" style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:var(--bg-color);">
+                            <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">DATE & TIME</th>
+                            <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">STUDENT</th>
+                            <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">PARENT PHONE</th>
+                            <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;width:30%;">MESSAGE</th>
+                            <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">STATUS</th>
+                            <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">DETAILS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sms-logs-tbody">
+                        <tr><td colspan="6" style="text-align:center;padding:2rem;">Loading logs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Details Modal -->
+        <div id="sms-details-modal" class="modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+            <div class="modal-content" style="background:#fff;padding:2rem;border-radius:12px;width:90%;max-width:600px;position:relative;">
+                <button onclick="document.getElementById('sms-details-modal').style.display='none'" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;"><i class="ph ph-x"></i></button>
+                <h2>SMS Details</h2>
+                <div style="margin-top:1rem;">
+                    <p><strong>Error Message:</strong> <span id="modal-error-message"></span></p>
+                    <p style="margin-top:1rem;"><strong>API Response:</strong></p>
+                    <pre id="modal-api-response" style="background:var(--bg-color);padding:1rem;border-radius:8px;overflow-x:auto;font-size:0.85rem;white-space:pre-wrap;"></pre>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+

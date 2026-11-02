@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student - EduGate School System</title>
+    <link rel="stylesheet" href="css/style.css?v=1.3">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="js/config.js?v=1.3" defer></script>
+    <script src="js/app.js?v=1.9" defer></script>
+    <script src="js/students.js?v=1.3" defer></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ph ph-graduation-cap"></i></div>
+            <div class="sidebar-header-text">
+                <h2>EduGate</h2><p>School System</p>
+            </div>
+        </div>
+        <div class="sidebar-scroll">
+            <div class="nav-section">
+                <div class="nav-section-title">MANAGEMENT</div>
+                <ul class="sidebar-menu">
+                    <li><a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a></li>
+                    <li><a href="students.html"><i class="ph ph-users-three"></i> Students</a></li>
+                    <li class="active"><a href="add_student.html"><i class="ph ph-plus-circle"></i> Add Student</a></li>
+                    <li><a href="scanner.html"><i class="ph ph-scan"></i> Attendance Scanner</a></li>
+                    <li><a href="records.html"><i class="ph ph-list-dashes"></i> Attendance Records</a></li>
+                    <li><a href="reports.html"><i class="ph ph-file-text"></i> Reports</a></li>
+                </ul>
+            </div>
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">FINANCE</div>
+                <ul class="sidebar-menu">
+                    <li><a href="billing.html"><i class="ph ph-currency-circle-dollar"></i> Billing</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="communication.html#tab-sms"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="communication.html#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="communication.html#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                    <li><a href="sms_logs.html"><i class="ph ph-list"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">OTHER</div>
+                <ul class="sidebar-menu">
+                    <li><a href="settings.html"><i class="ph ph-gear"></i> Settings</a></li>
+                    <li><a href="staff.html"><i class="ph ph-user-gear"></i> Staff Management</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=4f46e5&color=fff" alt="Admin">
+            <div class="sidebar-footer-info"><h4>Admin User</h4><p>Administrator</p></div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-header">
+            <div class="header-left">
+                <button class="mobile-toggle"><i class="ph ph-list"></i></button>
+                <div>
+                    <h1>Register New Student</h1>
+                    <p>Add a new student to the system.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="max-width: 600px; margin: 0 auto;">
+            <form id="add-student-form">
+                <div class="form-group">
+                    <label for="full_name">Full Name *</label>
+                    <input type="text" id="full_name" name="full_name" class="form-control" required placeholder="e.g. John Doe">
+                </div>
+                
+                <div class="form-group">
+                    <label for="admission_number">Admission Number *</label>
+                    <input type="text" id="admission_number" name="admission_number" class="form-control" required placeholder="e.g. ADM-1024">
+                </div>
+
+                <div class="form-group" style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+                    <div>
+                        <label for="class">Class *</label>
+                        <select id="class" name="class" class="form-control" required>
+                            <option value="">Select Class</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="gender">Gender *</label>
+                        <select id="gender" name="gender" class="form-control" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+                    <div>
+                        <label for="dob">Date of Birth</label>
+                        <input type="date" id="dob" name="dob" class="form-control">
+                    </div>
+                    <div>
+                        <label for="valid_until">ID Valid Until</label>
+                        <input type="date" id="valid_until" name="valid_until" class="form-control">
+                        <small style="color:var(--text-muted); font-size:0.8rem;">Auto-fills based on Class settings.</small>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label for="photo">Student Photo</label>
+                    <input type="file" id="photo" name="photo" class="form-control" accept="image/*">
+                    <small style="color:var(--text-muted); font-size:0.8rem;">Supported formats: JPG, PNG, GIF</small>
+                </div>
+
+                <h3 style="margin: 2rem 0 1rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); font-size: 1.05rem; color: var(--text-main);">
+                    <i class="ph ph-users-three" style="color: var(--primary); vertical-align: middle;"></i> Parent/Guardian Information
+                </h3>
+
+                <div class="form-group">
+                    <label for="parent_name">Parent/Guardian Full Name *</label>
+                    <input type="text" id="parent_name" name="parent_name" class="form-control" required placeholder="e.g. Jane Doe">
+                </div>
+
+                <div class="form-group" style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+                    <div>
+                        <label for="parent_phone">Parent/Guardian Phone Number *</label>
+                        <input type="tel" id="parent_phone" name="parent_phone" class="form-control" required
+                               placeholder="e.g. +254712345678"
+                               pattern="^\+?[0-9\s\-\(\)]{7,20}$"
+                               title="Enter a valid phone number (7-15 digits, optional leading +). e.g. +254712345678 or 0712345678">
+                        <small style="color:var(--text-muted); font-size:0.8rem;">Format: +254712345678 or 0712345678</small>
+                    </div>
+                    <div>
+                        <label for="parent_relationship">Relationship to Student *</label>
+                        <select id="parent_relationship" name="parent_relationship" class="form-control" required>
+                            <option value="">Select Relationship</option>
+                            <option value="Father">Father</option>
+                            <option value="Mother">Mother</option>
+                            <option value="Guardian">Guardian</option>
+                            <option value="Grandparent">Grandparent</option>
+                            <option value="Uncle">Uncle</option>
+                            <option value="Aunt">Aunt</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" id="parent_relationship_other_group" style="display:none;">
+                    <label for="parent_relationship_other">Please Specify Relationship *</label>
+                    <input type="text" id="parent_relationship_other" name="parent_relationship_other" class="form-control" placeholder="e.g. Family Friend, Sibling">
+                </div>
+
+                <div style="text-align: right; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ph ph-floppy-disk"></i> Save Student
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>
+

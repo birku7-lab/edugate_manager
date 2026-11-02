@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Records - EduGate School System</title>
+    <link rel="stylesheet" href="css/style.css?v=1.3">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="js/config.js?v=1.3" defer></script>
+    <script src="js/app.js?v=1.9" defer></script>
+    <script src="js/records.js?v=1.3" defer></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ph ph-graduation-cap"></i></div>
+            <div class="sidebar-header-text">
+                <h2>EduGate</h2><p>School System</p>
+            </div>
+        </div>
+        <div class="sidebar-scroll">
+            <div class="nav-section">
+                <div class="nav-section-title">MANAGEMENT</div>
+                <ul class="sidebar-menu">
+                    <li><a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a></li>
+                    <li><a href="students.html"><i class="ph ph-users-three"></i> Students</a></li>
+                    <li><a href="add_student.html"><i class="ph ph-plus-circle"></i> Add Student</a></li>
+                    <li><a href="scanner.html"><i class="ph ph-scan"></i> Attendance Scanner</a></li>
+                    <li class="active"><a href="records.html"><i class="ph ph-list-dashes"></i> Attendance Records</a></li>
+                    <li><a href="reports.html"><i class="ph ph-file-text"></i> Reports</a></li>
+                </ul>
+            </div>
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">FINANCE</div>
+                <ul class="sidebar-menu">
+                    <li><a href="billing.html"><i class="ph ph-currency-circle-dollar"></i> Billing</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="communication.html#tab-sms"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="communication.html#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="communication.html#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                    <li><a href="sms_logs.html"><i class="ph ph-list"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">OTHER</div>
+                <ul class="sidebar-menu">
+                    <li><a href="settings.html"><i class="ph ph-gear"></i> Settings</a></li>
+                    <li><a href="staff.html"><i class="ph ph-user-gear"></i> Staff Management</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=4f46e5&color=fff" alt="Admin">
+            <div class="sidebar-footer-info"><h4>Admin User</h4><p>Administrator</p></div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-header">
+            <div class="header-left">
+                <button class="mobile-toggle"><i class="ph ph-list"></i></button>
+                <div>
+                    <h1>Attendance Records</h1>
+                    <p>Search and filter historical attendance data.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 2rem;">
+            <form id="filter-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; align-items: end;">
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-muted); display:block; margin-bottom:0.4rem; font-weight: 500;">Date (Specific)</label>
+                    <input type="date" name="date" class="form-control">
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-muted); display:block; margin-bottom:0.4rem; font-weight: 500;">Start Date</label>
+                    <input type="date" name="start_date" class="form-control">
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-muted); display:block; margin-bottom:0.4rem; font-weight: 500;">End Date</label>
+                    <input type="date" name="end_date" class="form-control">
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-muted); display:block; margin-bottom:0.4rem; font-weight: 500;">Student Name</label>
+                    <input type="text" name="student_name" class="form-control" placeholder="Search name...">
+                </div>
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-muted); display:block; margin-bottom:0.4rem; font-weight: 500;">Class</label>
+                    <select name="class" id="filter-class" class="form-control">
+                        <option value="">Select Class</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content:center;">
+                        <i class="ph ph-funnel"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="table-container">
+                <table id="records-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Adm No.</th>
+                            <th>Name</th>
+                            <th>Class</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data loaded via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+

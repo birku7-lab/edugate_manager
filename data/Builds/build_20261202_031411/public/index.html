@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - EduGate School System</title>
+    <link rel="stylesheet" href="css/style.css?v=1.6">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script src="js/config.js?v=1.6" defer></script>
+    <script src="js/app.js?v=1.9" defer></script>
+    <script src="js/dashboard.js?v=1.6" defer></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon">
+                <i class="ph ph-graduation-cap"></i>
+            </div>
+            <div class="sidebar-header-text">
+                <h2>EduGate</h2>
+                <p>School System</p>
+            </div>
+        </div>
+        
+        <div class="sidebar-scroll">
+            <div class="nav-section">
+                <div class="nav-section-title">MANAGEMENT</div>
+                <ul class="sidebar-menu">
+                    <li class="active"><a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a></li>
+                    <li><a href="students.html"><i class="ph ph-users-three"></i> Students</a></li>
+                    <li><a href="add_student.html"><i class="ph ph-plus-circle"></i> Add Student</a></li>
+                    <li class="scanner-attendance"><a href="scanner.html?mode=attendance"><i class="ph ph-scan"></i> Attendance Scanner</a></li>
+                    <li class="scanner-meals"><a href="scanner.html?mode=meals"><i class="ph ph-bowl-food"></i> Meals Scanner</a></li>
+                    <li class="scanner-transport"><a href="scanner.html?mode=transport"><i class="ph ph-bus"></i> Transport Scanner</a></li>
+                    <li><a href="records.html"><i class="ph ph-list-dashes"></i> Attendance Records</a></li>
+                    <li><a href="reports.html"><i class="ph ph-file-text"></i> Reports</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">FINANCE</div>
+                <ul class="sidebar-menu">
+                    <li><a href="billing.html"><i class="ph ph-currency-circle-dollar"></i> Billing</a></li>
+                </ul>
+            </div>
+
+            
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="communication.html#tab-sms"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="communication.html#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="communication.html#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                    <li><a href="sms_logs.html"><i class="ph ph-list"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">OTHER</div>
+                <ul class="sidebar-menu">
+                    <li><a href="settings.html"><i class="ph ph-gear"></i> Settings</a></li>
+                    <li class="admin-only-nav"><a href="buses.html"><i class="ph ph-bus"></i> Bus Management</a></li>
+                    <li><a href="staff.html"><i class="ph ph-user-gear"></i> Staff Management</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=4f46e5&color=fff" alt="Admin">
+            <div class="sidebar-footer-info">
+                <h4>Admin User</h4>
+                <p>Administrator</p>
+            </div>
+            <i class="ph ph-caret-up" style="color: var(--sidebar-text); margin-left: auto;"></i>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="top-header">
+            <div class="header-left">
+                <button class="mobile-toggle"><i class="ph ph-list"></i></button>
+                <div>
+                    <h1>Welcome back, Admin <span style="font-size: 1.5rem;">👋</span></h1>
+                    <p>Here's what's happening at your school today.</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-widget">
+                    <i class="ph ph-calendar-blank"></i>
+                    <span id="current-date-widget">23 May 2024</span>
+                </div>
+                <div class="header-widget">
+                    <i class="ph ph-clock"></i>
+                    <span id="current-time-widget">08:45 AM</span>
+                </div>
+                <button class="notification-btn">
+                    <i class="ph ph-bell"></i>
+                    <span class="badge">3</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Stat Cards Row -->
+            <div class="card stat-card col-span-3">
+                <div class="stat-card-top">
+                    <div class="stat-icon bg-purple"><i class="ph ph-users-three"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Students</h3>
+                        <div class="stat-value" id="stat-total">...</div>
+                        <p>All registered students</p>
+                    </div>
+                </div>
+                <!-- Inline SVG Wave -->
+                <svg class="stat-wave" viewBox="0 0 100 25" preserveAspectRatio="none" style="height: 40px; fill: none; stroke: url(#purpleGrad); stroke-width: 2;">
+                    <defs>
+                        <linearGradient id="purpleGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#a855f7" />
+                            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M0 15 C 20 0, 40 30, 60 15 C 80 0, 100 15, 100 15" />
+                </svg>
+            </div>
+
+            <div class="card stat-card col-span-3">
+                <div class="stat-card-top">
+                    <div class="stat-icon bg-green"><i class="ph ph-check-circle"></i></div>
+                    <div class="stat-info">
+                        <h3>Present Today</h3>
+                        <div class="stat-value" id="stat-present">...</div>
+                        <p id="stat-present-subtitle">...</p>
+                    </div>
+                </div>
+                <svg class="stat-wave" viewBox="0 0 100 25" preserveAspectRatio="none" style="height: 40px; fill: none; stroke: url(#greenGrad); stroke-width: 2;">
+                    <defs>
+                        <linearGradient id="greenGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#10b981" />
+                            <stop offset="100%" stop-color="#34d399" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M0 15 C 20 0, 40 30, 60 15 C 80 0, 100 15, 100 15" />
+                </svg>
+            </div>
+
+            <div class="card stat-card col-span-3">
+                <div class="stat-card-top">
+                    <div class="stat-icon bg-yellow"><i class="ph ph-user-minus"></i></div>
+                    <div class="stat-info">
+                        <h3>Absent Today</h3>
+                        <div class="stat-value" id="stat-absent">...</div>
+                        <p id="stat-absent-subtitle">...</p>
+                    </div>
+                </div>
+                <svg class="stat-wave" viewBox="0 0 100 25" preserveAspectRatio="none" style="height: 40px; fill: none; stroke: url(#yellowGrad); stroke-width: 2;">
+                    <defs>
+                        <linearGradient id="yellowGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#f59e0b" />
+                            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M0 15 C 20 0, 40 30, 60 15 C 80 0, 100 15, 100 15" />
+                </svg>
+            </div>
+
+            <div class="card stat-card col-span-3">
+                <div class="stat-card-top">
+                    <div class="stat-icon bg-blue"><i class="ph ph-chart-pie-slice"></i></div>
+                    <div class="stat-info">
+                        <h3>Attendance %</h3>
+                        <div class="stat-value" id="stat-percentage">...</div>
+                        <p>Today's attendance rate</p>
+                    </div>
+                </div>
+                <svg class="stat-wave" viewBox="0 0 100 25" preserveAspectRatio="none" style="height: 40px; fill: none; stroke: url(#blueGrad); stroke-width: 2;">
+                    <defs>
+                        <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#3b82f6" />
+                            <stop offset="100%" stop-color="#60a5fa" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M0 15 C 20 0, 40 30, 60 15 C 80 0, 100 15, 100 15" />
+                </svg>
+            </div>
+
+            <!-- Additional Stats Row -->
+            <div class="card stat-card col-span-6">
+                <div class="stat-card-top">
+                    <div class="stat-icon" style="background-color: rgba(234, 179, 8, 0.2); color: #eab308;"><i class="ph ph-bowl-food"></i></div>
+                    <div class="stat-info">
+                        <h3>Meals Served</h3>
+                        <div class="stat-value" id="stat-meals">...</div>
+                        <p>Total meals served today</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card stat-card col-span-6">
+                <div class="stat-card-top">
+                    <div class="stat-icon" style="background-color: rgba(14, 165, 233, 0.2); color: #0ea5e9;"><i class="ph ph-bus"></i></div>
+                    <div class="stat-info">
+                        <h3>Transport Boarded</h3>
+                        <div class="stat-value" id="stat-transport">...</div>
+                        <p>Total students boarded buses today</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Row -->
+            <div class="card col-span-8">
+                <div class="card-title">
+                    Attendance Overview
+                    <select class="select-sm">
+                        <option>This Week</option>
+                        <option>Last Week</option>
+                    </select>
+                </div>
+                <div style="height: 300px; width: 100%;">
+                    <canvas id="attendanceLineChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card col-span-4">
+                <div class="card-title">
+                    Live Scans
+                    <span class="badge badge-success" style="font-size: 0.7rem;"><i class="ph-fill ph-circle"></i> Scanning</span>
+                </div>
+                <div class="live-scans-list" id="live-scans-container">
+                    <!-- Populated via JS -->
+                </div>
+                <a href="records.html" class="view-all-link">View all scans <i class="ph ph-arrow-right"></i></a>
+            </div>
+
+            <!-- Bottom Row -->
+            <div class="card col-span-4">
+                <div class="card-title">Attendance by Class</div>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1rem;">
+                    <div style="height: 180px; width: 180px; position: relative;">
+                        <canvas id="classDonutChart"></canvas>
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                            <h3 id="donut-total" style="font-size: 1.5rem; font-weight: 700;">-</h3>
+                            <p style="font-size: 0.75rem; color: var(--text-muted);">Total</p>
+                        </div>
+                    </div>
+                    <div id="donut-legend" style="flex: 1; font-size: 0.8rem; display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Legend via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="card col-span-4">
+                <div class="card-title">Today's Summary</div>
+                <div class="summary-list">
+                    <div class="summary-item">
+                        <div class="summary-label"><i class="ph ph-clock"></i> School Starts</div>
+                        <div class="summary-value">07:00 AM</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label"><i class="ph ph-play-circle"></i> Scanning Started</div>
+                        <div class="summary-value">06:30 AM</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label"><i class="ph ph-users"></i> Total Scans</div>
+                        <div class="summary-value" id="summary-total-scans">-</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label"><i class="ph ph-clock-counter-clockwise"></i> Last Scan</div>
+                        <div class="summary-value" id="summary-last-scan">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card col-span-4">
+                <div class="card-title">Quick Actions</div>
+                <div class="quick-actions-grid">
+                    <a href="scanner.html" class="action-btn">
+                        <div class="action-icon bg-green"><i class="ph ph-qr-code"></i></div>
+                        Scan Student
+                    </a>
+                    <a href="add_student.html" class="action-btn">
+                        <div class="action-icon bg-purple"><i class="ph ph-user-plus"></i></div>
+                        Add Student
+                    </a>
+                    <a href="reports.html" class="action-btn">
+                        <div class="action-icon bg-blue"><i class="ph ph-printer"></i></div>
+                        Print Reports
+                    </a>
+                    <a href="records.html" class="action-btn">
+                        <div class="action-icon bg-yellow"><i class="ph ph-file-text"></i></div>
+                        View Records
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Billing Overview Section (Admin only) -->
+        <div id="billing-overview-section" class="admin-only-nav" style="margin-top:0.5rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                <h2 style="margin:0;font-size:1.15rem;font-weight:700;color:var(--text-main);">
+                    <i class="ph ph-currency-circle-dollar" style="color:var(--primary);vertical-align:middle;margin-right:0.4rem;"></i>Billing Overview
+                </h2>
+                <a href="billing.html" style="font-size:0.85rem;color:var(--primary);font-weight:600;text-decoration:none;">
+                    Manage Billing <i class="ph ph-arrow-right"></i>
+                </a>
+            </div>
+            <div id="dashboard-billing-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;">
+                <div class="card" style="padding:1.25rem;text-align:center;color:var(--text-muted);">
+                    <i class="ph ph-spinner" style="font-size:1.5rem;animation:spin 1s linear infinite;"></i>
+                    <p style="margin:0.5rem 0 0;">Loading billing data…</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-footer">
+            <div class="footer-left">
+                <i class="ph-fill ph-shield-check"></i>
+                <span>Education is the most powerful weapon which you can use to change the world.</span>
+            </div>
+            <div>
+                &copy; <span id="copyright-year"></span> EduGate School System. All rights reserved.
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('copyright-year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
+

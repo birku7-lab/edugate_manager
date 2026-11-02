@@ -1,0 +1,52 @@
+<?php
+/* Protected by SoftBuilt PHP Shield v1.0 - Unauthorised duplication or alteration is strictly prohibited */
+header('Content-Type: application/json');
+require_once 'config.php';
+require_once 'auth_middleware.php';
+
+$action = $_GET['action'] ?? 'list';
+
+try {
+    if ($action === 'list') {
+        $stmt = $pdo->query("SELECT * FROM holidays ORDER BY start_date ASC");
+        $x_0001 = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode(['status' => 'success', 'data' => $x_0001]);
+    } 
+    elseif ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $name = $_POST['name'] ?? '';
+        $x_0002 = $_POST['start_date'] ?? '';
+        $x_0003 = $_POST['end_date'] ?? '';
+        $x_0004 = $_POST['description'] ?? '';
+
+        if (!$name || !$x_0002 || !$x_0003) {
+            echo json_encode(['status' => 'error', 'message' => 'Name and dates are required']);
+            exit;
+        }
+
+        $stmt = $pdo->prepare("INSERT INTO holidays (name, start_date, end_date, description) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$name, $x_0002, $x_0003, $x_0004]);
+        
+        log_audit($pdo, $x_0005['id'] ?? null, 'ADD_HOLIDAY', "Added holiday: $name");
+        echo json_encode(['status' => 'success', 'message' => 'Holiday added successfully', 'id' => $pdo->lastInsertId()]);
+    }
+    elseif ($action === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $id = $_POST['id'] ?? 0;
+        if (!$id) {
+            echo json_encode(['status' => 'error', 'message' => 'ID is required']);
+            exit;
+        }
+
+        $stmt = $pdo->prepare("DELETE FROM holidays WHERE id = ?");
+        $stmt->execute([$id]);
+        
+        log_audit($pdo, $x_0005['id'] ?? null, 'DELETE_HOLIDAY', "Deleted holiday ID: $id");
+        echo json_encode(['status' => 'success', 'message' => 'Holiday deleted successfully']);
+    }
+    else {
+        echo json_encode(['status' => 'error', 'message' => 'Invalid action']);
+    }
+} catch (PDOException $e) {
+    error_log("Database error in holidays.php: " . $e->getMessage());
+    echo json_encode(['status' => 'error', 'message' => 'Something went wrong.']);
+}
+?>

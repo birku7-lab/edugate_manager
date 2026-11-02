@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students - EduGate School System</title>
+    <link rel="stylesheet" href="css/style.css?v=1.6">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="js/config.js?v=1.6" defer></script>
+    <script src="js/app.js?v=1.9" defer></script>
+    <script src="js/students.js?v=1.6" defer></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ph ph-graduation-cap"></i></div>
+            <div class="sidebar-header-text">
+                <h2>EduGate</h2><p>School System</p>
+            </div>
+        </div>
+        <div class="sidebar-scroll">
+            <div class="nav-section">
+                <div class="nav-section-title">MANAGEMENT</div>
+                <ul class="sidebar-menu">
+                    <li><a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a></li>
+                    <li class="active"><a href="students.html"><i class="ph ph-users-three"></i> Students</a></li>
+                    <li><a href="add_student.html"><i class="ph ph-plus-circle"></i> Add Student</a></li>
+                    <li class="scanner-attendance"><a href="scanner.html?mode=attendance"><i class="ph ph-scan"></i> Attendance Scanner</a></li>
+                    <li class="scanner-meals"><a href="scanner.html?mode=meals"><i class="ph ph-bowl-food"></i> Meals Scanner</a></li>
+                    <li class="scanner-transport"><a href="scanner.html?mode=transport"><i class="ph ph-bus"></i> Transport Scanner</a></li>
+                    <li><a href="records.html"><i class="ph ph-list-dashes"></i> Attendance Records</a></li>
+                    <li><a href="reports.html"><i class="ph ph-file-text"></i> Reports</a></li>
+                </ul>
+            </div>
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">FINANCE</div>
+                <ul class="sidebar-menu">
+                    <li><a href="billing.html"><i class="ph ph-currency-circle-dollar"></i> Billing</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="communication.html#tab-sms"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="communication.html#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="communication.html#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                    <li><a href="sms_logs.html"><i class="ph ph-list"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">OTHER</div>
+                <ul class="sidebar-menu">
+                    <li><a href="settings.html"><i class="ph ph-gear"></i> Settings</a></li>
+                    <li class="admin-only-nav"><a href="buses.html"><i class="ph ph-bus"></i> Bus Management</a></li>
+                    <li><a href="staff.html"><i class="ph ph-user-gear"></i> Staff Management</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=4f46e5&color=fff" alt="Admin">
+            <div class="sidebar-footer-info"><h4>Admin User</h4><p>Administrator</p></div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+            <div class="header-left" style="display: flex; align-items: flex-start; gap: 1rem;">
+                <button class="mobile-toggle"><i class="ph ph-list"></i></button>
+                <div>
+                    <h1 style="font-size: 1.8rem; color: #1e1b4b; font-weight: 700; margin-bottom: 0.2rem;">Students Directory</h1>
+                    <p style="color: #64748b; font-size: 0.95rem;">Manage and view student records</p>
+                </div>
+            </div>
+            <div class="header-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 1rem;">
+                <div style="font-size: 0.85rem; color: #64748b; font-weight: 500;">
+                    <span style="color: #1e293b; font-weight: 700;">Dashboard</span> &gt; Students
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn" style="background: white; color: #059669; border: 1px solid #e2e8f0; font-weight: 600; padding: 0.6rem 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" onclick="openPdfModal()">
+                        <i class="ph ph-file-pdf" style="font-size: 1.2rem;"></i> Export PDF
+                    </button>
+                    <button class="btn" style="background: white; color: #4f46e5; border: 1px solid #e2e8f0; font-weight: 600; padding: 0.6rem 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);" onclick="openGenerateQRModal()">
+                        <i class="ph ph-qr-code" style="font-size: 1.2rem;"></i> Generate QR PDF
+                    </button>
+                    <a href="add_student.html" class="btn btn-primary" style="background: #3b82f6; border-radius: 8px; padding: 0.6rem 1.2rem; font-weight: 600; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2); display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="ph ph-plus" style="font-size: 1.2rem;"></i> Register New Student
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <!-- Total Students -->
+            <div style="background: white; border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 12px; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+                        <i class="ph ph-users"></i>
+                    </div>
+                    <div>
+                        <p style="color: #64748b; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem;">Total Students</p>
+                        <h2 id="stat-total" style="color: #1e293b; font-size: 1.6rem; margin: 0; font-weight: 700;">-</h2>
+                        <p style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.2rem;">All registered students</p>
+                    </div>
+                </div>
+                <div style="width: 30px; height: 30px; border-radius: 8px; background: #f8fafc; color: #8b5cf6; display: flex; align-items: center; justify-content: center;">
+                    <i class="ph ph-users-three"></i>
+                </div>
+            </div>
+            
+            <!-- Male Students -->
+            <div style="background: white; border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 12px; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+                        <i class="ph ph-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <p style="color: #64748b; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem;">Male Students</p>
+                        <h2 id="stat-male" style="color: #1e293b; font-size: 1.6rem; margin: 0; font-weight: 700;">-</h2>
+                        <p id="stat-male-pct" style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.2rem;">-</p>
+                    </div>
+                </div>
+                <div style="width: 30px; height: 30px; border-radius: 8px; background: #f8fafc; color: #10b981; display: flex; align-items: center; justify-content: center;">
+                    <i class="ph ph-chalkboard-teacher"></i>
+                </div>
+            </div>
+
+            <!-- Female Students -->
+            <div style="background: white; border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 12px; background: #faf5ff; color: #d946ef; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+                        <i class="ph ph-gender-female"></i>
+                    </div>
+                    <div>
+                        <p style="color: #64748b; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem;">Female Students</p>
+                        <h2 id="stat-female" style="color: #1e293b; font-size: 1.6rem; margin: 0; font-weight: 700;">-</h2>
+                        <p id="stat-female-pct" style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.2rem;">-</p>
+                    </div>
+                </div>
+                <div style="width: 30px; height: 30px; border-radius: 8px; background: #f8fafc; color: #d946ef; display: flex; align-items: center; justify-content: center;">
+                    <i class="ph ph-gender-female"></i>
+                </div>
+            </div>
+
+            <!-- Total Classes -->
+            <div style="background: white; border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 12px; background: #fff7ed; color: #f97316; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+                        <i class="ph ph-chalkboard"></i>
+                    </div>
+                    <div>
+                        <p style="color: #64748b; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem;">Total Classes</p>
+                        <h2 id="stat-classes" style="color: #1e293b; font-size: 1.6rem; margin: 0; font-weight: 700;">-</h2>
+                        <p style="color: #94a3b8; font-size: 0.75rem; margin-top: 0.2rem;">Active classes</p>
+                    </div>
+                </div>
+                <div style="width: 30px; height: 30px; border-radius: 8px; background: #f8fafc; color: #f97316; display: flex; align-items: center; justify-content: center;">
+                    <i class="ph ph-desktop"></i>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); padding: 1.5rem;">
+            <!-- Filters Row -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div style="position: relative; width: 100%; max-width: 400px;">
+                    <i class="ph ph-magnifying-glass" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.2rem;"></i>
+                    <input type="text" id="search-student" class="form-control" placeholder="Search by name or admission number..." style="width: 100%; padding-left: 3rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; height: 45px;">
+                </div>
+                
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; flex: 1; justify-content: flex-end;">
+                    <select id="filter-class" style="height: 45px; border-radius: 8px; border: 1px solid #e2e8f0; color: #475569; font-weight: 500; padding: 0 1rem; background: white; outline: none; min-width: 130px; appearance: none; position: relative;">
+                        <option value="">All Classes</option>
+                    </select>
+                    <select id="filter-gender" style="height: 45px; border-radius: 8px; border: 1px solid #e2e8f0; color: #475569; font-weight: 500; padding: 0 1rem; background: white; outline: none; min-width: 130px;">
+                        <option value="">All Genders</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                    <select id="filter-status" style="height: 45px; border-radius: 8px; border: 1px solid #e2e8f0; color: #475569; font-weight: 500; padding: 0 1rem; background: white; outline: none; min-width: 130px;">
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                    </select>
+                    <select id="filter-billing" class="admin-only-nav" style="height: 45px; border-radius: 8px; border: 1px solid #e2e8f0; color: #475569; font-weight: 500; padding: 0 1rem; background: white; outline: none; min-width: 130px;">
+                        <option value="">All Billing Status</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Partial">Partial</option>
+                        <option value="Unpaid">Unpaid</option>
+                        <option value="Exempt">Exempt</option>
+                    </select>
+                    <button class="btn" onclick="clearFilters()" style="height: 45px; border: 1px solid #e2e8f0; background: white; color: #475569; border-radius: 8px; padding: 0 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="ph ph-x-circle"></i> Clear Filters
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container" style="border: none; overflow-x: auto;">
+                <table id="students-table" style="width: 100%; border-collapse: separate; border-spacing: 0 0.8rem;">
+                    <thead>
+                        <tr>
+                            <th style="background: transparent; border: none; color: #64748b; font-weight: 600; padding: 0.5rem 1rem;">Photo</th>
+                            <th style="background: transparent; border: none; color: #64748b; font-weight: 600; padding: 0.5rem 1rem;">Name</th>
+                            <th style="background: transparent; border: none; color: #64748b; font-weight: 600; padding: 0.5rem 1rem;">Admission No.</th>
+                            <th style="background: transparent; border: none; color: #64748b; font-weight: 600; padding: 0.5rem 1rem;">Class</th>
+                            <th style="background: transparent; border: none; color: #64748b; font-weight: 600; padding: 0.5rem 1rem;">Gender</th>
+                            <th style="background: transparent; border: none; color: #64748b; font-weight: 600; padding: 0.5rem 1rem;">Status</th>
+                            <th class="admin-only-nav" style="background: transparent; border: none; color: #64748b; font-weight: 600; padding: 0.5rem 1rem;">Billing</th>
+                            <th style="background: transparent; border: none; color: #64748b; font-weight: 600; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.3rem;">Date Added <i class="ph ph-caret-up-down"></i></th>
+                            <th style="background: transparent; border: none; color: #64748b; font-weight: 600; padding: 0.5rem 1rem; text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-tbody">
+                        <!-- Data will be loaded here via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Footer -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1.5rem; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; color: #64748b; font-size: 0.9rem; font-weight: 500;">
+                    Show 
+                    <select id="items-per-page" style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.3rem 0.5rem; color: #1e293b; font-weight: 600; outline: none; background: #f8fafc;">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                    </select>
+                    entries
+                </div>
+                
+                <div id="pagination-info" style="color: #94a3b8; font-size: 0.9rem; font-weight: 500;">
+                    Showing 1 to 10 of 1,248 students
+                </div>
+
+                <div id="pagination-controls" style="display: flex; gap: 0.3rem;">
+                    <!-- Buttons loaded via JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- PDF Export / Print Options Modal -->
+    <div id="pdf-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;">
+        <div class="glass-card" style="width: 90%; max-width: 460px; max-height: 90vh; overflow-y: auto; position: relative;">
+            <button onclick="closePdfModal()" style="position: absolute; right: 15px; top: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--danger);">&times;</button>
+            <h3 style="margin-bottom: 0.4rem; color: var(--dark);"><i class="ph ph-file-pdf" style="color: #e11d48; vertical-align: middle;"></i> Export Student Records (PDF)</h3>
+            <p style="color: var(--gray); font-size: 0.85rem; margin-bottom: 1.25rem;">For administrative records only. QR codes, barcodes and photos are never included &mdash; use <em>Generate QR PDF</em> or <em>Generate Student ID</em> for those.</p>
+
+            <!-- Report Scope -->
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display:block; font-weight:600; font-size:0.85rem; color:var(--text-main, #1e293b); margin-bottom:0.5rem;">Include</label>
+                <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                    <label style="display:flex; align-items:center; gap:0.6rem; padding:0.6rem 0.75rem; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer;">
+                        <input type="radio" name="pdf-scope" value="all" checked>
+                        <span><strong>All Students</strong> &mdash; complete directory of all registered students</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.6rem; padding:0.6rem 0.75rem; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer;">
+                        <input type="radio" name="pdf-scope" value="present">
+                        <span><strong>Present Today</strong> &mdash; students already checked in today</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.6rem; padding:0.6rem 0.75rem; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer;">
+                        <input type="radio" name="pdf-scope" value="absent">
+                        <span><strong>Absent Today</strong> &mdash; students not yet checked in today</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Print Options -->
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display:block; font-weight:600; font-size:0.85rem; color:var(--text-main, #1e293b); margin-bottom:0.5rem;">Print Options &mdash; Columns to include</label>
+                <div id="pdf-field-options" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem 1rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.85rem;">
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.88rem; cursor:pointer;">
+                        <input type="checkbox" class="pdf-field-checkbox" data-field="admission_number" checked> Admission Number
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.88rem; cursor:pointer;">
+                        <input type="checkbox" class="pdf-field-checkbox" data-field="full_name" checked> Student Name
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.88rem; cursor:pointer;">
+                        <input type="checkbox" class="pdf-field-checkbox" data-field="class" checked> Class
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.88rem; cursor:pointer;">
+                        <input type="checkbox" class="pdf-field-checkbox" data-field="gender" checked> Gender
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.88rem; cursor:pointer;">
+                        <input type="checkbox" class="pdf-field-checkbox" data-field="parent_name" checked> Parent/Guardian Name
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.88rem; cursor:pointer;">
+                        <input type="checkbox" class="pdf-field-checkbox" data-field="parent_phone" checked> Parent/Guardian Phone
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.88rem; cursor:pointer;">
+                        <input type="checkbox" class="pdf-field-checkbox" data-field="fee_status"> Fee Status
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.88rem; cursor:pointer;">
+                        <input type="checkbox" class="pdf-field-checkbox" data-field="admitted_date"> Date Registered
+                    </label>
+                </div>
+                <p id="pdf-field-error" style="display:none; color:var(--danger); font-size:0.8rem; margin-top:0.5rem;">Select at least one column to include.</p>
+            </div>
+
+            <button class="btn btn-primary" style="width:100%; padding:0.85rem; justify-content:center;" id="btn-generate-pdf" onclick="downloadStudentsPDF()">
+                <i class="ph ph-file-pdf" style="font-size: 1.2rem; margin-right: 0.4rem;"></i> Generate PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Generate QR Codes Modal -->
+    <div id="generate-qr-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;">
+        <div class="glass-card" style="width: 90%; max-width: 400px; position: relative;">
+            <button onclick="closeGenerateQRModal()" style="position: absolute; right: 15px; top: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--danger);">&times;</button>
+            <h3 style="margin-bottom: 1.5rem; color: var(--dark);"><i class="ph ph-qr-code" style="color: #4f46e5; vertical-align: middle;"></i> Generate QR Codes</h3>
+            <p style="color: var(--gray); font-size: 0.9rem; margin-bottom: 1.5rem;">Generate blank QR codes to assign to students later.</p>
+            
+            <form id="generate-qr-form">
+                <div class="form-group">
+                    <label for="qr-quantity">How many QR codes?</label>
+                    <input type="number" id="qr-quantity" class="form-control" min="1" max="100" value="10" required>
+                </div>
+                <div class="form-group">
+                    <label for="qr-size">QR Code Size (mm)</label>
+                    <input type="number" id="qr-size" class="form-control" min="10" max="100" value="20" required>
+                </div>
+                <div class="form-group">
+                    <label for="qr-spacing">Spacing between QR Codes (mm)</label>
+                    <input type="number" id="qr-spacing" class="form-control" min="0" max="100" value="5" step="0.5" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="btn-generate-qr">Generate PDF</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assign QR Scanner Modal -->
+    <div id="assign-qr-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;">
+        <div class="glass-card" style="width: 90%; max-width: 500px; position: relative; display: flex; flex-direction: column; align-items: center;">
+            <button onclick="closeAssignQRScanner()" style="position: absolute; right: 15px; top: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--danger); z-index: 10;">&times;</button>
+            <h3 style="margin-bottom: 1.5rem; color: var(--dark); width: 100%; text-align: left;"><i class="ph ph-scan" style="color: #3b82f6; vertical-align: middle;"></i> Assign QR Code</h3>
+            
+            <div id="qr-reader" style="width: 100%; max-width: 400px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+            
+            <div id="assign-qr-status" style="margin-top: 1rem; width: 100%; text-align: center; color: #64748b; font-size: 0.95rem;">
+                Looking for QR code...
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Student Modal -->
+    <div id="edit-modal" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; pointer-events: none;">
+        <div class="glass-card" style="width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative; pointer-events: auto;">
+            <button onclick="closeEditModal()" style="position: absolute; right: 15px; top: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--danger);">&times;</button>
+            <h2 class="mb-2">Edit Student</h2>
+            <form id="edit-student-form">
+                <input type="hidden" id="edit-id" name="id">
+                <div class="form-group">
+                    <label for="edit-full-name">Full Name</label>
+                    <input type="text" id="edit-full-name" name="full_name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-admission-number">Admission Number</label>
+                    <input type="text" id="edit-admission-number" name="admission_number" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-class">Class/Grade</label>
+                    <select id="edit-class" name="class" class="form-control" required>
+                        <option value="">Select Class</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-gender">Gender</label>
+                    <select id="edit-gender" name="gender" class="form-control" required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-photo">New Photo (Optional)</label>
+                    <input type="file" id="edit-photo" name="photo" class="form-control" accept="image/*">
+                </div>
+
+                <h3 style="margin: 1.5rem 0 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 1rem; color: var(--text-main);">
+                    <i class="ph ph-users-three" style="color: var(--primary); vertical-align: middle;"></i> Parent/Guardian Information
+                </h3>
+
+                <div class="form-group">
+                    <label for="edit-parent_name">Parent/Guardian Full Name</label>
+                    <input type="text" id="edit-parent_name" name="parent_name" class="form-control" required placeholder="e.g. Jane Doe">
+                </div>
+                <div class="form-group">
+                    <label for="edit-parent_phone">Parent/Guardian Phone Number</label>
+                    <input type="tel" id="edit-parent_phone" name="parent_phone" class="form-control" required
+                           placeholder="e.g. +254712345678"
+                           pattern="^\+?[0-9\s\-\(\)]{7,20}$"
+                           title="Enter a valid phone number (7-15 digits, optional leading +). e.g. +254712345678 or 0712345678">
+                    <small style="color:var(--text-muted); font-size:0.8rem;">Format: +254712345678 or 0712345678</small>
+                </div>
+                <div class="form-group">
+                    <label for="edit-parent_relationship">Relationship to Student</label>
+                    <select id="edit-parent_relationship" name="parent_relationship" class="form-control" required>
+                        <option value="">Select Relationship</option>
+                        <option value="Father">Father</option>
+                        <option value="Mother">Mother</option>
+                        <option value="Guardian">Guardian</option>
+                        <option value="Grandparent">Grandparent</option>
+                        <option value="Uncle">Uncle</option>
+                        <option value="Aunt">Aunt</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group" id="edit-parent_relationship_other_group" style="display:none;">
+                    <label for="edit-parent_relationship_other">Please Specify Relationship</label>
+                    <input type="text" id="edit-parent_relationship_other" name="parent_relationship_other" class="form-control" placeholder="e.g. Family Friend, Sibling">
+                </div>
+
+                <!-- Transport Setup -->
+                <h3 style="margin: 1.5rem 0 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 1rem; color: var(--text-main);">
+                    <i class="ph ph-bus" style="color: var(--primary); vertical-align: middle;"></i> Transport Information
+                </h3>
+                <div class="form-group">
+                    <label for="edit-assigned_bus_id">Assigned Bus</label>
+                    <select id="edit-assigned_bus_id" name="assigned_bus_id" class="form-control">
+                        <option value="">-- No Bus Assigned --</option>
+                        <!-- Fetched dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-route_number">Route Number</label>
+                    <input type="text" id="edit-route_number" name="route_number" class="form-control" placeholder="e.g. RT-01">
+                </div>
+                <div class="form-group">
+                    <label for="edit-pickup_location">Pickup Location</label>
+                    <input type="text" id="edit-pickup_location" name="pickup_location" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="edit-dropoff_location">Dropoff Location</label>
+                    <input type="text" id="edit-dropoff_location" name="dropoff_location" class="form-control">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+

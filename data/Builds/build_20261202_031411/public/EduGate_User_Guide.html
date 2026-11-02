@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduGate School System - User Guide</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-color: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text-main);
+            background: #fff;
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px;
+            max-width: 900px;
+            margin: auto;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: var(--primary);
+            margin: 0 0 10px 0;
+            font-size: 2.5rem;
+        }
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        h2 {
+            color: var(--primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #334155;
+            margin-top: 25px;
+        }
+        ul, ol {
+            padding-left: 20px;
+            color: #334155;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .tip {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .tip strong {
+            color: #1d4ed8;
+        }
+        .btn-print {
+            display: block;
+            width: fit-content;
+            margin: 0 auto 30px auto;
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+            transition: background 0.2s;
+        }
+        .btn-print:hover {
+            background: #4338ca;
+        }
+        @media print {
+            .btn-print { display: none; }
+            body { padding: 0; }
+            .page-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="btn-print" onclick="window.print()">🖨️ Save as PDF / Print Guide</button>
+
+    <div class="header">
+        <h1>EduGate School System</h1>
+        <p>Comprehensive User Guide & Manual</p>
+    </div>
+
+    <h2>1. Introduction</h2>
+    <p>Welcome to <strong>EduGate</strong>! This system provides a fully integrated solution for managing students, tracking attendance via QR codes, processing billing, and generating insightful reports. This guide will walk you through all the features available to streamline your school's daily operations.</p>
+    
+    <div class="tip">
+        <strong>Note for Staff vs. Admins:</strong> Some features, such as Finance (Billing) and Settings, are restricted to Administrators. Regular staff can manage student data, mark attendance, and view reports.
+    </div>
+
+    <h2>2. Dashboard</h2>
+    <p>The Dashboard is the first screen you see after logging in. It acts as the central hub of your school's data.</p>
+    <ul>
+        <li><strong>Overview Statistics:</strong> Instantly view the total number of students, today's attendance rate, active buses, and pending absentees.</li>
+        <li><strong>Recent Activity:</strong> See a live feed of the latest system updates, such as newly registered students, recent payments, and attendance scans.</li>
+    </ul>
+
+    <h2>3. Student Management</h2>
+    <h3>Adding a New Student</h3>
+    <ol>
+        <li>Navigate to the <strong>Add Student</strong> page via the sidebar.</li>
+        <li>Fill out the student's personal details, class, gender, and date of birth.</li>
+        <li>Enter <strong>Parent/Guardian</strong> contact information (Name, Phone, Email) for emergency contact and notifications.</li>
+        <li>Upload a profile picture for the student (optional but recommended for ID cards).</li>
+        <li>Click <strong>Save Student</strong>. The system will automatically generate a unique Admission Number and a printable QR Code for the student.</li>
+    </ol>
+
+    <h3>Viewing and Managing Students</h3>
+    <ul>
+        <li>Go to the <strong>Students</strong> page to view the complete directory.</li>
+        <li>Use the <strong>Search Bar</strong> to quickly find students by name or admission number, and filter by class.</li>
+        <li><strong>Print IDs:</strong> Select one or multiple students and use the <strong>Bulk Actions</strong> bar to print their ID cards with QR codes.</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <h2>4. Attendance & Scanner</h2>
+    <p>EduGate completely digitizes the attendance process using QR code technology.</p>
+    
+    <h3>Using the Attendance Scanner</h3>
+    <ol>
+        <li>Navigate to the <strong>Attendance Scanner</strong> page.</li>
+        <li>You will be prompted to grant camera access. Allow this to use your webcam or tablet camera.</li>
+        <li>Select the <strong>Scan Mode</strong>: Check In or Check Out.</li>
+        <li>Hold the student's ID Card (QR Code) up to the camera.</li>
+        <li>The system will automatically recognize the student, log the time, and display a success message with their photo.</li>
+    </ol>
+
+    <h3>Manual Attendance & Records</h3>
+    <ul>
+        <li>If a student forgets their ID, go to the <strong>Attendance Records</strong> page.</li>
+        <li>You can manually mark a student as Present, Absent, or Late using the interface.</li>
+        <li>Use the filters on this page to view attendance logs by specific dates, classes, or individual students.</li>
+    </ul>
+
+    <h2>5. Billing & Finance (Admin Only)</h2>
+    <p>The Billing section allows administrators to assign fees, track payments, and monitor outstanding balances.</p>
+
+    <h3>Assigning Fees</h3>
+    <ol>
+        <li>Go to <strong>Billing</strong>.</li>
+        <li>Click on the <strong>Assign Category</strong> icon (➕) next to a student's name, or select multiple students and use the Bulk Action bar to "Assign Category" (e.g., Tuition, Meals, Transport).</li>
+        <li>Set the amount due and optional due dates.</li>
+    </ol>
+
+    <h3>Recording Payments</h3>
+    <ol>
+        <li>On the Billing page, locate the student and click the <strong>Pay</strong> button next to their unpaid category, or click the <strong>Eye Icon</strong> to view their full billing profile.</li>
+        <li>In the Payment Modal, enter the <strong>Amount Being Paid</strong>, Payment Method, and Date.</li>
+        <li>Click <strong>Record Payment</strong>.</li>
+    </ol>
+    
+    <div class="tip">
+        <strong>Automated Balances:</strong> The system automatically calculates remaining balances. If a student pays less than the total due, their status changes to <strong>Partially Paid</strong>. Once fully cleared, it changes to <strong>Paid</strong>.
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2>6. Reporting & Analytics</h2>
+    <p>EduGate provides robust reporting tools to keep you informed about school performance.</p>
+    <ul>
+        <li><strong>Attendance Reports:</strong> Generate daily, weekly, or term-based attendance summaries. Filter by class to identify absentee trends.</li>
+        <li><strong>Billing Reports:</strong> Track total revenue collected versus expected. Identify students with overdue balances.</li>
+        <li><strong>Exporting:</strong> All reports can be exported instantly to <strong>Excel (.xlsx)</strong> or <strong>PDF</strong> formats for printing or emailing to parents.</li>
+    </ul>
+
+    <h2>7. System Settings & Staff</h2>
+    <h3>Settings (Admin Only)</h3>
+    <p>Navigate to the <strong>Settings</strong> page to configure core system behavior:</p>
+    <ul>
+        <li>Update the <strong>School Name, Contact Info, and Logo</strong>.</li>
+        <li>Set the current <strong>Academic Year and Term</strong> (this applies to all new billing records).</li>
+        <li>Configure Timezones and notification preferences.</li>
+    </ul>
+
+    <h3>Staff Management (Admin Only)</h3>
+    <p>Add and manage system users from the <strong>Staff Management</strong> page.</p>
+    <ul>
+        <li><strong>Admin Role:</strong> Has full access to everything, including Finance, Settings, and deleting records.</li>
+        <li><strong>Staff Role:</strong> Can register students, scan attendance, and view reports, but cannot access Billing or System Settings.</li>
+        <li>Admins can reset staff passwords if they forget them.</li>
+    </ul>
+
+    <hr style="margin: 40px 0; border: 0; border-top: 1px solid var(--border-color);">
+    <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+        Thank you for choosing EduGate. For further technical support, please contact your system administrator.
+    </p>
+
+</body>
+</html>

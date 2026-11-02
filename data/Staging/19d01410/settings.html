@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - EduGate School System</title>
+    <link rel="stylesheet" href="css/style.css?v=1.3">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="js/config.js?v=1.3" defer></script>
+    <script src="js/app.js?v=1.9" defer></script>
+    <script src="js/settings.js?v=1.6" defer></script>
+    <style>
+        .settings-container {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        .settings-sidebar {
+            width: 250px;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .settings-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .settings-menu li {
+            margin-bottom: 0.5rem;
+        }
+        .settings-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.8rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .settings-menu a:hover {
+            background: var(--bg-color);
+            color: var(--primary);
+        }
+        .settings-menu a.active {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+        }
+        .settings-content {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            min-height: 600px;
+        }
+        .settings-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .settings-section.active {
+            display: block;
+        }
+        .section-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .section-header h2 {
+            margin: 0;
+            color: var(--text-main);
+        }
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toggles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .setting-row:last-child { border-bottom: none; }
+        .setting-info h4 { margin: 0; color: var(--text-main); font-size: 1rem; }
+        .setting-info p { margin: 5px 0 0 0; color: var(--text-muted); font-size: 0.85rem; }
+
+        .color-picker {
+            display: flex; gap: 10px; flex-wrap: wrap;
+        }
+        .color-swatch {
+            width: 35px; height: 35px; border-radius: 50%; cursor: pointer;
+            border: 2px solid transparent; transition: var(--transition);
+        }
+        .color-swatch.active { border-color: var(--text-main); transform: scale(1.1); }
+    </style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ph ph-graduation-cap"></i></div>
+            <div class="sidebar-header-text">
+                <h2>EduGate</h2>
+                <p>Attendance System</p>
+            </div>
+        </div>
+        
+        <div class="sidebar-scroll">
+            <div class="nav-section">
+                <div class="nav-section-title">MAIN MENU</div>
+                <ul class="sidebar-menu">
+                    <li><a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a></li>
+                    <li><a href="scanner.html"><i class="ph ph-scan"></i> Scanner</a></li>
+                    <li><a href="records.html"><i class="ph ph-list-dashes"></i> Records</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">MANAGEMENT</div>
+                <ul class="sidebar-menu">
+                    <li><a href="students.html"><i class="ph ph-users"></i> Students</a></li>
+                    <li><a href="add_student.html"><i class="ph ph-user-plus"></i> Add Student</a></li>
+                    <li><a href="reports.html"><i class="ph ph-chart-bar"></i> Reports</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">FINANCE</div>
+                <ul class="sidebar-menu">
+                    <li><a href="billing.html"><i class="ph ph-currency-circle-dollar"></i> Billing</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="communication.html#tab-sms"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="communication.html#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="communication.html#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                    <li><a href="sms_logs.html"><i class="ph ph-list"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">SYSTEM</div>
+                <ul class="sidebar-menu">
+                    <li class="active"><a href="settings.html"><i class="ph ph-gear"></i> Settings</a></li>
+                    <li><a href="staff.html"><i class="ph ph-user-gear"></i> Staff Management</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <button class="mobile-toggle"><i class="ph ph-list"></i></button>
+        
+        <div class="top-header">
+            <div class="header-left">
+                <h1><i class="ph ph-gear"></i> System Settings</h1>
+                <p>Configure how your attendance system operates</p>
+            </div>
+        </div>
+
+        <div class="settings-container">
+            <aside class="settings-sidebar">
+                <ul class="settings-menu">
+                    <li><a href="#tab-school" class="active"><i class="ph ph-buildings"></i> School Info</a></li>
+                    <li><a href="#tab-schedule"><i class="ph ph-clock"></i> Schedule</a></li>
+                    <li><a href="#tab-holidays"><i class="ph ph-calendar-star"></i> Holidays</a></li>
+                    <li><a href="#tab-weekends"><i class="ph ph-calendar-blank"></i> Weekends</a></li>
+                    <li><a href="#tab-theme"><i class="ph ph-palette"></i> Appearance</a></li>
+                    <li><a href="#tab-dashboard"><i class="ph ph-layout"></i> Dashboard</a></li>
+                    <li><a href="#tab-notifications"><i class="ph ph-bell"></i> Notifications</a></li>
+                    <li><a href="#tab-qrcode"><i class="ph ph-qr-code"></i> QR Codes</a></li>
+                    <li><a href="#tab-idcard"><i class="ph ph-identification-card"></i> ID Card Designer</a></li>
+                    <li><a href="#tab-classes"><i class="ph ph-users-four"></i> Classes</a></li>
+                    <li class="admin-only-nav"><a href="#tab-billing"><i class="ph ph-currency-circle-dollar"></i> Billing Categories</a></li>
+                    <li class="admin-only-nav"><a href="#tab-scanner-billing"><i class="ph ph-shield-check"></i> Scanner Rules</a></li>
+                    <li class="admin-only-nav"><a href="#tab-rollover"><i class="ph ph-calendar-plus"></i> Academic Terms</a></li>
+                </ul>
+            </aside>
+
+            <div class="settings-content">
+                <!-- School Info Tab -->
+                <div id="tab-school" class="settings-section active">
+                    <div class="section-header">
+                        <h2>School Information</h2>
+                        <p>Basic details about your institution used in reports and UI.</p>
+                    </div>
+                    <form id="form-school" class="settings-form">
+                        <div class="form-group">
+                            <label>School Name</label>
+                            <input type="text" name="school_name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>School Motto</label>
+                            <input type="text" name="school_motto" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>School Address</label>
+                            <input type="text" name="school_address" class="form-control">
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="text" name="school_phone" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" name="school_email" class="form-control">
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                            <div class="form-group">
+                                <label>Academic Year</label>
+                                <input type="text" name="academic_year" class="form-control" placeholder="e.g. 2026/2027">
+                            </div>
+                            <div class="form-group">
+                                <label>Current Term</label>
+                                <input type="text" name="current_term" class="form-control" placeholder="e.g. Term 1">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>School Website</label>
+                            <input type="text" name="school_website" class="form-control" placeholder="e.g. www.sunrisehigh.sc.ke">
+                        </div>
+                        <div class="form-group">
+                            <label>School Logo</label>
+                            <input type="file" name="school_logo" id="school_logo" class="form-control" accept="image/*">
+                            <small style="color:var(--text-muted);">Will be used on ID cards and reports.</small>
+                            <div style="margin-top: 10px;">
+                                <img id="logo-preview" src="" style="max-height: 80px; display: none; border-radius: 5px;">
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:1rem;">
+                              <div class="form-group">
+                                  <label>School Arrival Time</label>
+                                  <input type="time" name="school_arrival_time" class="form-control">
+                              </div>
+                              <div class="form-group">
+                                  <label>School Departure Time</label>
+                                  <input type="time" name="school_departure_time" class="form-control">
+                              </div>
+                              <div class="form-group">
+                                  <label>Fee Target Policy (%)</label>
+                                  <input type="number" name="fee_policy_target_percentage" class="form-control" placeholder="e.g. 80" min="0" max="100">
+                                  <small style="color:var(--text-muted); font-size:0.8rem;">Min % required for access</small>
+                              </div>
+                          </div>
+                          
+                          <button type="submit" class="btn btn-primary mt-3">Save School Info</button>
+                    </form>
+                </div>
+
+                <!-- Schedule Tab -->
+                <div id="tab-schedule" class="settings-section">
+                    <div class="section-header">
+                        <h2>Attendance Schedule</h2>
+                        <p>Define when students are expected to arrive and when they are marked late or absent.</p>
+                    </div>
+                    <form id="form-schedule" class="settings-form">
+                        <div class="form-group">
+                            <label>School Opening Time</label>
+                            <input type="time" name="school_opening_time" class="form-control">
+                            <small style="color:var(--text-muted);">When the gates open.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Late Arrival Time</label>
+                            <input type="time" name="late_arrival_time" class="form-control">
+                            <small style="color:var(--text-muted);">Scans after this time are marked as 'Late'.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Attendance Cut-off Time</label>
+                            <input type="time" name="attendance_cutoff_time" class="form-control">
+                            <small style="color:var(--text-muted);">Scans after this time are marked as 'Absent'.</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Save Schedule</button>
+                    </form>
+                </div>
+
+                <!-- Holidays Tab -->
+                <div id="tab-holidays" class="settings-section">
+                    <div class="section-header">
+                        <h2>Holidays & Non-School Days</h2>
+                        <p>Attendance is automatically disabled during these configured periods.</p>
+                    </div>
+                    <div style="background:var(--bg-color); padding:1rem; border-radius:var(--radius-md); margin-bottom:2rem;">
+                        <h4>Add New Holiday</h4>
+                        <form id="form-add-holiday" style="margin-top:1rem;">
+                            <div class="form-group">
+                                <input type="text" name="name" class="form-control" placeholder="Holiday Name (e.g. Christmas Break)" required>
+                            </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                                <div class="form-group">
+                                    <label>Start Date</label>
+                                    <input type="date" name="start_date" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>End Date</label>
+                                    <input type="date" name="end_date" class="form-control" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success">Add Holiday</button>
+                        </form>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="holidays-table">
+                            <thead>
+                                <tr>
+                                    <th>Holiday Name</th>
+                                    <th>Duration</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Weekends Tab -->
+                <div id="tab-weekends" class="settings-section">
+                    <div class="section-header">
+                        <h2>Weekend Settings</h2>
+                        <p>Select which days of the week are considered active school days.</p>
+                    </div>
+                    <form id="form-weekends" class="settings-form">
+                        <div id="days-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Save Days</button>
+                    </form>
+                </div>
+
+                <!-- Academic Terms & Rollover Tab -->
+                <div id="tab-rollover" class="settings-section admin-only-nav">
+                    <div class="section-header">
+                        <h2><i class="ph ph-calendar-plus"></i> Academic Terms & Rollover</h2>
+                        <p>Manage school terms. When an active term ends, the system automatically rolls over to the next Upcoming term and carries forward student balances.</p>
+                    </div>
+
+                    <div style="background:var(--bg-color); padding:1rem; border-radius:var(--radius-md); margin-bottom:2rem;">
+                        <h4>Add Upcoming Term</h4>
+                        <form id="form-add-term" style="margin-top:1rem;">
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                                <div class="form-group">
+                                    <label>Academic Year</label>
+                                    <input type="text" name="academic_year" class="form-control" placeholder="e.g. 2026/2027" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Term Name</label>
+                                    <input type="text" name="term_name" class="form-control" placeholder="e.g. Term 2" required>
+                                </div>
+                            </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                                <div class="form-group">
+                                    <label>Start Date</label>
+                                    <input type="date" name="start_date" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>End Date</label>
+                                    <input type="date" name="end_date" class="form-control" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary"><i class="ph ph-plus"></i> Schedule Term</button>
+                        </form>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="terms-table">
+                            <thead>
+                                <tr>
+                                    <th>Term Name</th>
+                                    <th>Academic Year</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="6" style="text-align:center;padding:1rem;">Loading terms...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SMS Settings Tab -->
+                <!-- Removed SMS Tabs -->
+
+                <!-- Theme Tab -->
+                <div id="tab-theme" class="settings-section">
+                    <div class="section-header">
+                        <h2>Theme & Appearance</h2>
+                        <p>Customize the look and feel of the application.</p>
+                    </div>
+                    <form id="form-theme" class="settings-form">
+                        <div class="form-group">
+                            <label>System Theme</label>
+                            <select name="theme" class="form-control">
+                                <option value="light">Light Mode</option>
+                                <option value="dark">Dark Mode</option>
+                                <option value="auto">Auto (System Default)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-top:2rem;">
+                            <label>Accent Color</label>
+                            <div class="color-picker" id="accent-colors">
+                                <div class="color-swatch" data-color="blue" style="background:#3b82f6;"></div>
+                                <div class="color-swatch" data-color="purple" style="background:#8b5cf6;"></div>
+                                <div class="color-swatch" data-color="indigo" style="background:#4f46e5;"></div>
+                                <div class="color-swatch" data-color="green" style="background:#10b981;"></div>
+                                <div class="color-swatch" data-color="orange" style="background:#f59e0b;"></div>
+                                <div class="color-swatch" data-color="red" style="background:#ef4444;"></div>
+                                <div class="color-swatch" data-color="pink" style="background:#ec4899;"></div>
+                                <div class="color-swatch" data-color="teal" style="background:#14b8a6;"></div>
+                            </div>
+                            <input type="hidden" name="accent_color" id="input-accent-color">
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Apply Theme</button>
+                    </form>
+                </div>
+
+                <!-- Dashboard Tab -->
+                <div id="tab-dashboard" class="settings-section">
+                    <div class="section-header">
+                        <h2>Dashboard Customization</h2>
+                        <p>Toggle modules on the main dashboard.</p>
+                    </div>
+                    <form id="form-dashboard" class="settings-form">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Stat Cards</h4>
+                                <p>Show the top 4 metric cards (Total, Present, Absent, %).</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="dash_cards">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Live Scan Feed</h4>
+                                <p>Show the real-time list of student scans.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="dash_live_scan">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Attendance Charts</h4>
+                                <p>Show the weekly performance graphs.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="dash_charts">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Quick Actions</h4>
+                                <p>Show the quick shortcut buttons at the bottom.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="dash_quick_actions">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Save Layout</button>
+                    </form>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div id="tab-notifications" class="settings-section">
+                    <div class="section-header">
+                        <h2>Notification Settings</h2>
+                        <p>Control system alerts and feedback.</p>
+                    </div>
+                    <form id="form-notifications" class="settings-form">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Success Notifications</h4>
+                                <p>Show green toast popups when actions succeed.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="notifications_success">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Error Notifications</h4>
+                                <p>Show red toast popups when actions fail.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="notifications_error">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>M-Pesa Live Popups</h4>
+                                <p>Show a large central popup for 5 seconds when a new M-Pesa payment arrives.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="notifications_mpesa" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row" style="background:#f0fdf4; padding:15px; border-radius:8px; margin-top:15px;">
+                            <div class="setting-info">
+                                <h4 style="color:#166534;">Test M-Pesa Popup</h4>
+                                <p style="color:#15803d;">Click to instantly preview the massive center-screen popup.</p>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="if(typeof showBigMpesaPopup === 'function'){ showBigMpesaPopup('<strong>Student:</strong> TEST STUDENT (Form 1)<br><strong>Parent:</strong> TEST PARENT<br><strong>Paid:</strong> KES 1500<br><button class=\'btn btn-sm\' style=\'margin-top: 15px; background: #10b981; color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(16,185,129,0.3);\'>🖨️ Print Receipt</button>', true); } else { alert('Wait! Your browser is still caching the old code! Please press Ctrl+F5 or clear your browser cache!'); }" style="background:#16a34a; border-color:#16a34a;">Trigger Test Popup</button>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Save Preferences</button>
+                    </form>
+                </div>
+
+                <!-- QR Codes Tab -->
+                <div id="tab-qrcode" class="settings-section">
+                    <div class="section-header">
+                        <h2>QR Code Generator Settings</h2>
+                        <p>Adjust how student QR codes are visually generated.</p>
+                    </div>
+                    <form id="form-qrcode" class="settings-form">
+                        <div class="form-group">
+                            <label>QR Code Size (px)</label>
+                            <input type="number" name="qr_size" class="form-control" min="100" max="1000">
+                        </div>
+                        <div class="form-group">
+                            <label>Margin Level</label>
+                            <input type="number" name="qr_margin" class="form-control" min="0" max="10">
+                        </div>
+                        <div class="form-group">
+                            <label>Error Correction Level</label>
+                            <select name="qr_correction" class="form-control">
+                                <option value="L">Low (7%)</option>
+                                <option value="M">Medium (15%)</option>
+                                <option value="Q">Quartile (25%)</option>
+                                <option value="H">High (30%)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Save QR Specs</button>
+                    </form>
+                </div>
+
+                <!-- ID Card Designer Tab -->
+                <div id="tab-idcard" class="settings-section">
+                    <div class="section-header">
+                        <h2><i class="ph ph-identification-card"></i> ID Card Designer</h2>
+                        <p>Customize how student ID cards look when printed. Changes are reflected immediately in the preview.</p>
+                    </div>
+
+                    <div style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start;">
+                        <!-- Controls -->
+                        <form id="form-idcard" class="settings-form" style="flex: 1; min-width: 280px;">
+
+                            <h4 style="margin-bottom:1rem; color:var(--text-main); border-bottom:1px solid var(--border-color); padding-bottom:0.5rem;">Layout</h4>
+
+                            <div class="form-group">
+                                <label>Orientation</label>
+                                <div style="display:flex; gap:1rem; margin-top:0.5rem;">
+                                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:500;">
+                                        <input type="radio" name="id_card_orientation" value="vertical" checked onchange="previewIDCard()"> Vertical (Portrait)
+                                    </label>
+                                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:500;">
+                                        <input type="radio" name="id_card_orientation" value="horizontal" onchange="previewIDCard()"> Horizontal (Landscape)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Card Size</label>
+                                <select name="id_card_size" class="form-control" onchange="previewIDCard()">
+                                    <option value="small">Small (CR80 — Standard Credit Card)</option>
+                                    <option value="medium" selected>Medium (A7)</option>
+                                    <option value="large">Large (A6)</option>
+                                </select>
+                            </div>
+
+                            <h4 style="margin-bottom:1rem; margin-top:1.5rem; color:var(--text-main); border-bottom:1px solid var(--border-color); padding-bottom:0.5rem;">Colors</h4>
+
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                                <div class="form-group">
+                                    <label>Header Color</label>
+                                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                                        <input type="color" name="id_card_header_color" value="#4f46e5" class="form-control" style="height:40px; padding:2px; cursor:pointer;" onchange="previewIDCard()">
+                                        <span id="header-color-val" style="font-size:0.8rem; color:var(--text-muted);">#4f46e5</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Header Text Color</label>
+                                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                                        <input type="color" name="id_card_header_text_color" value="#ffffff" class="form-control" style="height:40px; padding:2px; cursor:pointer;" onchange="previewIDCard()">
+                                        <span id="header-text-color-val" style="font-size:0.8rem; color:var(--text-muted);">#ffffff</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Card Background</label>
+                                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                                        <input type="color" name="id_card_bg_color" value="#ffffff" class="form-control" style="height:40px; padding:2px; cursor:pointer;" onchange="previewIDCard()">
+                                        <span id="bg-color-val" style="font-size:0.8rem; color:var(--text-muted);">#ffffff</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Footer Color</label>
+                                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                                        <input type="color" name="id_card_footer_color" value="#0f172a" class="form-control" style="height:40px; padding:2px; cursor:pointer;" onchange="previewIDCard()">
+                                        <span id="footer-color-val" style="font-size:0.8rem; color:var(--text-muted);">#0f172a</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4 style="margin-bottom:1rem; margin-top:1.5rem; color:var(--text-main); border-bottom:1px solid var(--border-color); padding-bottom:0.5rem;">Text Content</h4>
+
+                            <div class="form-group">
+                                <label>Back Header Text</label>
+                                <input type="text" name="id_card_back_header" class="form-control" value="STUDENT ID CARD" placeholder="e.g. STUDENT ID CARD" onkeyup="previewIDCard()">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Terms Text (Back of Card)</label>
+                                <textarea name="id_card_terms" class="form-control" rows="3" onkeyup="previewIDCard()" placeholder="This card is the property of...">This card is the property of the school. It must be worn at all times on school premises. If found, please return to admin.</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary mt-3" style="width:100%;">
+                                <i class="ph ph-floppy-disk"></i> Save ID Card Settings
+                            </button>
+                        </form>
+
+                        <!-- Live Preview -->
+                        <div style="flex: 1; min-width: 220px; max-width: 320px;">
+                            <h4 style="margin-bottom:1rem; color:var(--text-main);">Live Preview</h4>
+                            <div id="idcard-preview" style="transform-origin: top left; transition: all 0.3s;">
+                                <!-- JS fills this -->
+                            </div>
+                            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.5rem;">* Preview uses placeholder data</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classes & Fees Tab -->
+                <div id="tab-classes" class="settings-section">
+                    <div class="section-header">
+                        <h2><i class="ph ph-users-four"></i> Classes</h2>
+                        <p>Manage your school's classes (e.g. Grade 8, Form 4, Class 6) You can type ANY class name you use.</p>
+                    </div>
+
+                    <form id="form-add-class" class="settings-form" style="display:flex; flex-wrap: wrap; gap:10px; align-items:flex-end; margin-bottom: 2rem; background: var(--bg-color); padding: 15px; border-radius: 8px;">
+                        <div class="form-group" style="flex:2; min-width:200px; margin-bottom:0;">
+                            <label>Class Name</label>
+                            <input type="text" name="class_name" id="class_name" class="form-control" required placeholder="e.g. Form 4, Grade 10, Class 8...">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="height:42px;"><i class="ph ph-plus"></i> Add</button>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table" id="classes-table">
+                            <thead>
+                                <tr>
+                                    <th>Class Name</th>
+                                    
+                                    <th width="100">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Classes injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Billing Categories Tab -->
+                <div id="tab-billing" class="settings-section">
+                    <div class="section-header">
+                        <h2><i class="ph ph-currency-circle-dollar"></i> Billing Categories</h2>
+                        <p>Manage fee categories assigned to students (School Fees, Meals, Transport, and custom categories).</p>
+                    </div>
+
+                    <!-- Add/Edit Form Panel -->
+                    <div id="billing-category-form-panel" style="display:none;background:var(--bg-color);border-radius:var(--radius-md);padding:1.5rem;margin-bottom:1.5rem;border:1px solid var(--border-color);">
+                        <h4 id="billing-cat-form-title" style="margin:0 0 1.25rem;color:var(--text-main);">Add New Category</h4>
+                        <form id="billing-category-form">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                                <div class="form-group">
+                                    <label>Category Name *</label>
+                                    <input type="text" id="bc-name" class="form-control" required placeholder="e.g. School Fees, Trips, Uniforms">
+                                </div>
+                                <div class="form-group">
+                                    <label>Default Amount (KES)</label>
+                                    <input type="number" id="bc-amount" class="form-control" min="0" step="0.01" value="0" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" id="bc-description" class="form-control" placeholder="Optional description of this fee category">
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+                                <div class="form-group">
+                                    <label>Sort Order</label>
+                                    <input type="number" id="bc-sort" class="form-control" value="0" min="0">
+                                    <small style="color:var(--text-muted);">Lower = appears first</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Global Due Date</label>
+                                    <input type="date" id="bc-due-date" class="form-control">
+                                    <small style="color:var(--text-muted);">Default due date for new term</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Grace Period (Days)</label>
+                                    <input type="number" id="bc-grace-period" class="form-control" value="0" min="0">
+                                    <small style="color:var(--text-muted);">Days until Overdue</small>
+                                </div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                                <div class="form-group" style="padding-top:0.5rem;">
+                                    <label>Assignment Type</label>
+                                    <div style="display:flex;gap:1rem;margin-top:0.5rem;">
+                                        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+                                            <input type="radio" name="bc-assignment-type" id="bc-assign-global" value="Global" checked onchange="toggleBcClassSelect()"> Global
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+                                            <input type="radio" name="bc-assignment-type" id="bc-assign-per-class" value="Per Class" onchange="toggleBcClassSelect()"> Per Class
+                                        </label>
+                                    </div>
+                                    <small style="color:var(--text-muted);display:block;margin-top:0.3rem;">Auto-assigned to students</small>
+                                </div>
+                                <div class="form-group" id="bc-class-select-group" style="display:none;">
+                                    <label>Select Classes & Specific Amounts</label>
+                                    <div id="bc-assigned-classes-container" style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color); padding: 0.75rem; border-radius: 6px; background: var(--bg-color); display: flex; flex-direction: column; gap: 0.5rem;">
+                                        <!-- Populated via JS -->
+                                    </div>
+                                    <small style="color:var(--text-muted);font-size:0.8rem;display:block;margin-top:0.25rem;">Leave amount blank to use the default amount.</small>
+                                </div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                                <div class="form-group" style="display:flex;align-items:center;gap:1rem;padding-top:1.5rem;">
+                                    <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight:500;">
+                                        <input type="checkbox" id="bc-mandatory"> Mandatory
+                                    </label>
+                                </div>
+                                <div class="form-group" style="display:flex;align-items:center;gap:1rem;padding-top:1.5rem;">
+                                    <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight:500;">
+                                        <input type="checkbox" id="bc-active" checked> Active
+                                    </label>
+                                </div>
+                                <div class="form-group" style="display:flex;align-items:center;gap:1rem;padding-top:1.5rem;">
+                                    <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight:500;">
+                                        <input type="checkbox" id="bc-enforce-scanner" checked> Enforce via Scanner
+                                    </label>
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:1rem;margin-top:0.5rem;">
+                                <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Save Category</button>
+                                <button type="button" onclick="closeBillingCategoryForm()" class="btn" style="background:var(--bg-color);color:var(--text-muted);border:1px solid var(--border-color);">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div style="margin-bottom:1.25rem;">
+                        <button onclick="openBillingCategoryForm()" class="btn btn-primary">
+                            <i class="ph ph-plus"></i> Add New Category
+                        </button>
+                    </div>
+
+                    <div class="table-container" style="overflow-x:auto;">
+                        <table id="billing-categories-table" style="width:100%;border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:var(--bg-color);">
+                                    <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">CATEGORY NAME</th>
+                                    <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">DESCRIPTION</th>
+                                    <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">DEFAULT AMOUNT</th>
+                                    <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">STATUS</th>
+                                    <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">USAGE</th>
+                                    <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">EDIT</th>
+                                    <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">DELETE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted);">Click "Billing Categories" tab to load…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Scanner & Billing Rules Tab -->
+                <div id="tab-scanner-billing" class="settings-section">
+                    <div class="section-header">
+                        <h2><i class="ph ph-shield-check"></i> Scanner & Billing Rules</h2>
+                        <p>Configure how the QR Attendance Scanner interacts with student billing data, and manage academic terms.</p>
+                    </div>
+
+                    <form id="form-scanner-billing" class="settings-form">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Enable Fee Verification</h4>
+                                <p>If enabled, the scanner will check "School Fees" balances before allowing attendance.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="billing_verify_enabled" value="1">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-top:2rem;">
+                            <div class="form-group">
+                                <label>Partial Payment Rule</label>
+                                <select name="billing_partial_rule" class="form-control">
+                                    <option value="Allow">Allow (Record Attendance normally)</option>
+                                    <option value="Warn">Warn (Record Attendance + Show Warning)</option>
+                                    <option value="Deny">Deny (Block Attendance)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Unpaid Rule</label>
+                                <select name="billing_unpaid_rule" class="form-control">
+                                    <option value="Allow">Allow (Record Attendance normally)</option>
+                                    <option value="Warn">Warn (Record Attendance + Show Warning)</option>
+                                    <option value="Deny">Deny (Block Attendance)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Overdue Rule</label>
+                                <select name="billing_overdue_rule" class="form-control">
+                                    <option value="Allow">Allow (Record Attendance normally)</option>
+                                    <option value="Warn">Warn (Record Attendance + Show Warning)</option>
+                                    <option value="Deny">Deny (Block Attendance)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label>Warning Message</label>
+                            <input type="text" name="billing_warning_message" class="form-control" placeholder="e.g. Warning: Outstanding School Fees KES {balance}">
+                            <small style="color:var(--text-muted);">Use {balance} to dynamically insert the outstanding amount.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Denial Message</label>
+                            <input type="text" name="billing_denial_message" class="form-control" placeholder="e.g. Access Denied: Please clear your KES {balance} fee balance.">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-3" style="width:100%;">
+                            <i class="ph ph-floppy-disk"></i> Save Scanner Rules
+                        </button>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+<script>
+// ---- ID Card Designer Preview ----
+function previewIDCard() {
+    const form = document.getElementById('form-idcard');
+    if (!form) return;
+    const fd = new FormData(form);
+
+    const orientation = fd.get('id_card_orientation') || 'vertical';
+    const size = fd.get('id_card_size') || 'medium';
+    const headerColor = fd.get('id_card_header_color') || '#4f46e5';
+    const headerTextColor = fd.get('id_card_header_text_color') || '#ffffff';
+    const bgColor = fd.get('id_card_bg_color') || '#ffffff';
+    const footerColor = fd.get('id_card_footer_color') || '#0f172a';
+    const backHeader = fd.get('id_card_back_header') || 'STUDENT ID CARD';
+    const terms = fd.get('id_card_terms') || '';
+
+    // Update color labels
+    document.getElementById('header-color-val').textContent = headerColor;
+    document.getElementById('header-text-color-val').textContent = headerTextColor;
+    document.getElementById('bg-color-val').textContent = bgColor;
+    document.getElementById('footer-color-val').textContent = footerColor;
+
+    const sizeMap = { small: { w: 150, h: 240 }, medium: { w: 190, h: 290 }, large: { w: 230, h: 330 } };
+    let { w, h } = sizeMap[size] || sizeMap.medium;
+    const isH = orientation === 'horizontal';
+    if (isH) { const tmp = w; w = h; h = tmp; }
+
+    const preview = document.getElementById('idcard-preview');
+    if (!preview) return;
+
+    const photoPlaceholder = `<div style="width:${isH?60:70}px;height:${isH?60:70}px;border-radius:50%;background:#e2e8f0;border:3px solid white;display:flex;align-items:center;justify-content:center;font-size:24px;">👤</div>`;
+
+    if (isH) {
+        // Horizontal Layout
+        preview.innerHTML = `
+        <div style="width:${w}px;height:${h}px;background:${bgColor};border-radius:10px;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.15);font-family:Inter,sans-serif;display:flex;flex-direction:column;position:relative;">
+            <div style="background:${headerColor};color:${headerTextColor};padding:8px 12px;display:flex;align-items:center;gap:8px;">
+                <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;">🏫</div>
+                <div><div style="font-weight:700;font-size:10px;">School Name</div><div style="font-size:7px;opacity:0.85;">Motto goes here</div></div>
+            </div>
+            <div style="display:flex;flex:1;padding:10px;gap:10px;align-items:center;">
+                ${photoPlaceholder}
+                <div style="flex:1;">
+                    <div style="font-weight:700;font-size:11px;color:#1e293b;">Student Name</div>
+                    <div style="font-size:9px;color:${headerColor};font-weight:600;margin-bottom:4px;">Class / Grade</div>
+                    <div style="font-size:8px;color:#475569;"><b>Adm No:</b> ADM-0001</div>
+                    <div style="font-size:8px;color:#475569;"><b>D.O.B:</b> 2005-01-15</div>
+                    <div style="font-size:8px;color:#475569;"><b>Valid Until:</b> 2026-12-31</div>
+                </div>
+            </div>
+            <div style="background:${footerColor};color:white;text-align:center;padding:4px;font-size:7px;">www.yourschool.com</div>
+        </div>`;
+    } else {
+        // Vertical Layout
+        const photoTop = Math.round(h * 0.2);
+        preview.innerHTML = `
+        <div style="width:${w}px;height:${h}px;background:${bgColor};border-radius:10px;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.15);font-family:Inter,sans-serif;display:flex;flex-direction:column;position:relative;">
+            <div style="background:${headerColor};color:${headerTextColor};padding:12px 10px;text-align:center;">
+                <div style="font-weight:700;font-size:11px;">School Name</div>
+                <div style="font-size:7px;opacity:0.85;margin-top:2px;">Motto goes here</div>
+            </div>
+            <div style="text-align:center;margin-top:-25px;z-index:2;">
+                ${photoPlaceholder.replace('margin:0 auto','margin:0 auto')}
+            </div>
+            <div style="text-align:center;margin-top:5px;">
+                <div style="font-weight:700;font-size:12px;color:#1e293b;">Student Name</div>
+                <div style="font-size:9px;color:${headerColor};font-weight:600;">Class / Grade</div>
+            </div>
+            <div style="padding:0 12px;margin-top:8px;flex:1;">
+                <div style="font-size:8px;color:#475569;display:flex;margin-bottom:3px;"><span style="color:#64748b;width:55px;font-weight:600;">Adm No:</span><span>ADM-0001</span></div>
+                <div style="font-size:8px;color:#475569;display:flex;margin-bottom:3px;"><span style="color:#64748b;width:55px;font-weight:600;">D.O.B:</span><span>2005-01-15</span></div>
+                <div style="font-size:8px;color:#475569;display:flex;"><span style="color:#64748b;width:55px;font-weight:600;">Valid Until:</span><span>2026-12-31</span></div>
+            </div>
+            <div style="background:${footerColor};color:white;text-align:center;padding:4px;font-size:7px;position:absolute;bottom:0;width:100%;">www.yourschool.com</div>
+        </div>`;
+    }
+}
+
+// Init preview on tab open
+document.addEventListener('DOMContentLoaded', () => {
+    // Run preview once settings load
+    const tabLink = document.querySelector('a[href="#tab-idcard"]');
+    if (tabLink) {
+        tabLink.addEventListener('click', () => setTimeout(previewIDCard, 100));
+    }
+});
+</script>
+<script src="js/settings.js?v=1.6"></script>
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management - EduGate</title>
+    <link rel="stylesheet" href="css/style.css?v=1.3">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="js/config.js?v=1.3" defer></script>
+    <script src="js/app.js?v=1.9" defer></script>
+    <script src="js/staff.js?v=1.3" defer></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ph ph-graduation-cap"></i></div>
+            <div class="sidebar-header-text">
+                <h2>EduGate</h2>
+                <p>Attendance System</p>
+            </div>
+        </div>
+        
+        <div class="sidebar-scroll">
+            <div class="nav-section">
+                <div class="nav-section-title">MAIN MENU</div>
+                <ul class="sidebar-menu">
+                    <li><a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a></li>
+                    <li><a href="scanner.html"><i class="ph ph-scan"></i> Scanner</a></li>
+                    <li><a href="records.html"><i class="ph ph-list-dashes"></i> Records</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">MANAGEMENT</div>
+                <ul class="sidebar-menu">
+                    <li><a href="students.html"><i class="ph ph-users"></i> Students</a></li>
+                    <li><a href="add_student.html"><i class="ph ph-user-plus"></i> Add Student</a></li>
+                    <li><a href="reports.html"><i class="ph ph-chart-bar"></i> Reports</a></li>
+                </ul>
+            </div>
+
+            
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="communication.html#tab-sms"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="communication.html#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="communication.html#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                    <li><a href="sms_logs.html"><i class="ph ph-list"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">SYSTEM</div>
+                <ul class="sidebar-menu">
+                    <li><a href="settings.html"><i class="ph ph-gear"></i> Settings</a></li>
+                    <li class="active"><a href="staff.html"><i class="ph ph-user-gear"></i> Staff Management</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <img src="https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff" alt="User" id="sidebar-user-avatar">
+            <div class="sidebar-footer-info">
+                <h4>User</h4>
+                <p>Role</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <button class="mobile-toggle">
+            <i class="ph ph-list"></i>
+        </button>
+        
+        <div class="top-header">
+            <div class="header-left">
+                <h1>Staff Management</h1>
+                <p>Manage system users, passwords, and feature permissions.</p>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    <i class="ph ph-plus"></i> Add New Staff
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="table-container">
+                <table id="staff-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Permissions</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staff-list">
+                        <!-- Fetched from JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Staff Modal -->
+    <div id="add-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Add Staff Member</h2>
+                <span class="close" onclick="closeAddModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="add-staff-form">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" name="password" class="form-control" required autocomplete="new-password">
+                    </div>
+                    <div class="form-group">
+                        <label>Account Role</label>
+                        <select name="role" class="form-control" id="role-select">
+                            <option value="Staff">Staff</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="permissions-container">
+                        <label>Allowed Features</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:10px; background:var(--bg-color); padding:1rem; border-radius:var(--radius-md);">
+                            <label><input type="checkbox" class="perm-check" value="index"> Dashboard</label>
+                            <label><input type="checkbox" class="perm-check" value="scanner_attendance"> Attendance Scanner</label>
+                            <label><input type="checkbox" class="perm-check" value="scanner_meals"> Meals Scanner</label>
+                            <label><input type="checkbox" class="perm-check" value="scanner_transport" id="perm-transport-add"> Transport Scanner</label>
+                            <label><input type="checkbox" class="perm-check" value="records"> Records</label>
+                            <label><input type="checkbox" class="perm-check" value="students"> View Students</label>
+                            <label><input type="checkbox" class="perm-check" value="add_student"> Add Student</label>
+                            
+                            <!-- Granular Reports -->
+                            <label><input type="checkbox" class="perm-check" value="reports_attendance"> Reports: Attendance</label>
+                            <label><input type="checkbox" class="perm-check" value="reports_billing"> Reports: Billing</label>
+                            <label><input type="checkbox" class="perm-check" value="reports_meals"> Reports: Meals</label>
+                            <label><input type="checkbox" class="perm-check" value="reports_transport"> Reports: Transport</label>
+                            
+                            <label><input type="checkbox" class="perm-check" value="settings"> Settings</label>
+                        </div>
+                        
+                        <div id="dynamic-permissions-add" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:10px; background:var(--bg-color); padding:1rem; border-radius:var(--radius-md); display:none;">
+                            <!-- Dynamic scanners/reports will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="form-group" id="add-bus-container" style="display: none; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                        <label>Assigned Bus (For Transport Scanner)</label>
+                        <select name="assigned_bus_id" id="add-assigned-bus" class="form-control">
+                            <option value="">-- No Bus Assigned --</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px;">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Edit Staff Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Edit Staff Member</h2>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="edit-staff-form">
+                    <input type="hidden" name="id" id="edit-id">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="name" id="edit-name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" name="username" id="edit-username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password (leave blank to keep current)</label>
+                        <input type="password" name="password" id="edit-password" class="form-control" autocomplete="new-password">
+                    </div>
+                    <div class="form-group">
+                        <label>Account Role</label>
+                        <select name="role" class="form-control" id="edit-role-select">
+                            <option value="Staff">Staff</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="edit-permissions-container">
+                        <label>Allowed Features</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:10px; background:var(--bg-color); padding:1rem; border-radius:var(--radius-md);">
+                            <label><input type="checkbox" class="edit-perm-check" value="index"> Dashboard</label>
+                            <label><input type="checkbox" class="edit-perm-check" value="scanner_attendance"> Attendance Scanner</label>
+                            <label><input type="checkbox" class="edit-perm-check" value="scanner_meals"> Meals Scanner</label>
+                            <label><input type="checkbox" class="edit-perm-check" value="scanner_transport" id="perm-transport-edit"> Transport Scanner</label>
+                            <label><input type="checkbox" class="edit-perm-check" value="records"> Records</label>
+                            <label><input type="checkbox" class="edit-perm-check" value="students"> View Students</label>
+                            <label><input type="checkbox" class="edit-perm-check" value="add_student"> Add Student</label>
+                            
+                            <!-- Granular Reports -->
+                            <label><input type="checkbox" class="edit-perm-check" value="reports_attendance"> Reports: Attendance</label>
+                            <label><input type="checkbox" class="edit-perm-check" value="reports_billing"> Reports: Billing</label>
+                            <label><input type="checkbox" class="edit-perm-check" value="reports_meals"> Reports: Meals</label>
+                            <label><input type="checkbox" class="edit-perm-check" value="reports_transport"> Reports: Transport</label>
+
+                            <label><input type="checkbox" class="edit-perm-check" value="settings"> Settings</label>
+                        </div>
+                        
+                        <div id="dynamic-permissions-edit" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:10px; background:var(--bg-color); padding:1rem; border-radius:var(--radius-md); display:none;">
+                            <!-- Dynamic scanners/reports will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="form-group" id="edit-bus-container" style="display: none; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                        <label>Assigned Bus (For Transport Scanner)</label>
+                        <select name="assigned_bus_id" id="edit-assigned-bus" class="form-control">
+                            <option value="">-- No Bus Assigned --</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px;">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+

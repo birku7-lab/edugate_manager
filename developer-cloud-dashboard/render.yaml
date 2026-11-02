@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: softbuilt-dev-dashboard
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    plan: free
+    envVars:
+      - key: DEV_DASHBOARD_PASSWORD
+        generateValue: false
+        value: softbuilt2026
+      - key: SECRET_KEY
+        generateValue: true

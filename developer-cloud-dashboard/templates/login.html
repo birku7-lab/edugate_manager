@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Developer Sign In • SoftBuilt Fleet Shield{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-75 mt-5">
+    <div class="col-md-5 col-lg-4">
+        <div class="card bg-surface border border-secondary-subtle shadow-lg rounded-4 p-4">
+            <div class="text-center mb-4">
+                <div class="brand-avatar mx-auto mb-3">🛡️</div>
+                <h3 class="fw-bold text-white mb-1">Developer Fleet Center</h3>
+                <p class="text-secondary small">Authenticate with Developer Master Passcode to manage client schools &amp; deployments.</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="mb-3">
+                    <label class="form-label text-light small fw-semibold">Master Passcode</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark-subtle border-secondary-subtle text-secondary"><i class="bi bi-key-fill"></i></span>
+                        <input type="password" name="password" class="form-control bg-dark text-white border-secondary-subtle py-2" placeholder="Enter developer passcode..." required autofocus>
+                    </div>
+                    <div class="form-text text-secondary fs-8 mt-1">Default passcode: <code>softbuilt2026</code> (configured via <code>DEV_DASHBOARD_PASSWORD</code>)</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-3 mt-2 shadow-sm">
+                    <i class="bi bi-shield-lock-fill me-1"></i> Access Fleet Dashboard
+                </button>
+            </form>
+
+            <div class="mt-4 pt-3 border-top border-secondary-subtle text-center text-secondary fs-8">
+                <i class="bi bi-lock-fill text-success me-1"></i> End-to-end telemetry isolation active. No school or student data is accessible.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

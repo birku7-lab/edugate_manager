@@ -1,0 +1,70 @@
+/* Print Styles */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    .sidebar, 
+    .btn, 
+    .mobile-toggle,
+    #notification-container,
+    .no-print {
+        display: none !important;
+    }
+
+    .main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    .glass-card {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    table th, table td {
+        border: 1px solid #ddd !important;
+        padding: 8px !important;
+        text-align: left;
+    }
+
+    table th {
+        background-color: #f8f9fa !important;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .print-header {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+    }
+
+    .print-header h1 {
+        font-size: 24px;
+        margin-bottom: 5px;
+    }
+
+    .print-header p {
+        font-size: 14px;
+        color: #555;
+    }
+}
+
+/* Hide print header on screen */
+@media screen {
+    .print-header {
+        display: none;
+    }
+}

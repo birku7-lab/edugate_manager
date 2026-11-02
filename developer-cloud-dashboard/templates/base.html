@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SoftBuilt Developer Fleet Center{% endblock %}</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body class="bg-dark text-light">
+
+    {% if session.get('is_authenticated') %}
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-surface border-bottom border-secondary-subtle sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold text-white d-flex align-items-center gap-2" href="{{ url_for('dashboard') }}">
+                <span class="brand-badge">🛡️</span>
+                <span>SoftBuilt <span class="text-primary-accent">Cloud Shield</span></span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill ms-2 fs-8">Developer Fleet</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link px-3 {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                            <i class="bi bi-speedometer2 me-1"></i> Fleet Overview
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3 {% if request.endpoint == 'schools_list' %}active{% endif %}" href="{{ url_for('schools_list') }}">
+                            <i class="bi bi-buildings me-1"></i> Schools &amp; Clients
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3 {% if request.endpoint == 'updates_list' %}active{% endif %}" href="{{ url_for('updates_list') }}">
+                            <i class="bi bi-cloud-arrow-up me-1"></i> Feature Updates (.zip)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3 {% if request.endpoint == 'errors_list' %}active{% endif %}" href="{{ url_for('errors_list') }}">
+                            <i class="bi bi-bug me-1"></i> Error Diagnostics
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle d-flex align-items-center gap-1 py-2 px-3 rounded-pill">
+                        <span class="pulse-indicator"></span> Zero-Knowledge Telemetry
+                    </span>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm px-3 rounded-pill">
+                        <i class="bi bi-box-arrow-right me-1"></i> Sign Out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Flash Notifications -->
+    <div class="container-fluid px-4 pt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show border-0 shadow-sm" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="container-fluid px-4 py-3">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="container-fluid px-4 py-3 border-top border-secondary-subtle mt-5 text-muted small d-flex justify-content-between align-items-center">
+        <div>
+            <span>&copy; {{ now_year or 2026 }} SoftBuilt Developer Fleet Dashboard. Privacy Safeguard: Zero access to client/school databases.</span>
+        </div>
+        <div>
+            <span class="text-secondary">Ready for Render.com • Railway • PythonAnywhere</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

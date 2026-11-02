@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - EduGate School System</title>
+    <link rel="stylesheet" href="css/style.css?v=1.4">
+    <link rel="stylesheet" href="css/print.css?v=1.3" media="print">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="js/config.js?v=1.3" defer></script>
+    <script src="js/app.js?v=1.9" defer></script>
+    <script src="js/reports.js?v=2.0" defer></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <style>
+        .summary-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .summary-card {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .summary-card p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .summary-card h2 {
+            margin: 0.5rem 0 0 0;
+            color: var(--text-main);
+            font-size: 1.8rem;
+        }
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+        .report-section { display: none; }
+        .report-section.active { display: block; }
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 1rem;
+        }
+        .pagination-controls button {
+            padding: 0.4rem 0.8rem;
+            margin-left: 0.5rem;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .pagination-controls button:disabled {
+            opacity: 0.5; cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar no-print">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ph ph-graduation-cap"></i></div>
+            <div class="sidebar-header-text">
+                <h2>EduGate</h2><p>School System</p>
+            </div>
+        </div>
+        <div class="sidebar-scroll">
+            <div class="nav-section">
+                <div class="nav-section-title">MANAGEMENT</div>
+                <ul class="sidebar-menu">
+                    <li><a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a></li>
+                    <li><a href="students.html"><i class="ph ph-users-three"></i> Students</a></li>
+                    <li><a href="add_student.html"><i class="ph ph-plus-circle"></i> Add Student</a></li>
+                    <li class="scanner-attendance"><a href="scanner.html?mode=attendance"><i class="ph ph-scan"></i> Attendance Scanner</a></li>
+                    <li class="scanner-meals"><a href="scanner.html?mode=meals"><i class="ph ph-bowl-food"></i> Meals Scanner</a></li>
+                    <li class="scanner-transport"><a href="scanner.html?mode=transport"><i class="ph ph-bus"></i> Transport Scanner</a></li>
+                    <li><a href="records.html"><i class="ph ph-list-dashes"></i> Attendance Records</a></li>
+                    <li class="active"><a href="reports.html"><i class="ph ph-file-text"></i> Reports</a></li>
+                </ul>
+            </div>
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">FINANCE</div>
+                <ul class="sidebar-menu">
+                    <li><a href="billing.html"><i class="ph ph-currency-circle-dollar"></i> Billing</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="communication.html#tab-sms"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="communication.html#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="communication.html#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                    <li><a href="sms_logs.html"><i class="ph ph-list"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">OTHER</div>
+                <ul class="sidebar-menu">
+                    <li><a href="settings.html"><i class="ph ph-gear"></i> Settings</a></li>
+                    <li class="admin-only-nav"><a href="buses.html"><i class="ph ph-bus"></i> Bus Management</a></li>
+                    <li><a href="staff.html"><i class="ph ph-user-gear"></i> Staff Management</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=4f46e5&color=fff" alt="Admin">
+            <div class="sidebar-footer-info"><h4>Admin User</h4><p>Administrator</p></div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <!-- Print Header -->
+        <div class="print-header">
+            <h1 id="print-title">EduGate Report</h1>
+            <p id="print-subtitle">Date: ...</p>
+        </div>
+
+        <div class="top-header no-print">
+            <div class="header-left">
+                <button class="mobile-toggle"><i class="ph ph-list"></i></button>
+                <div>
+                    <h1>Generate Reports</h1>
+                    <p>Create and print custom reports.</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-success" id="btn-print-report">
+                    <i class="ph ph-printer"></i> Print Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Report Tabs -->
+        <div class="no-print" style="display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:2px solid var(--border-color); flex-wrap: wrap;" id="reports-tabs-container">
+            <button id="tab-billing-btn" class="report-tab-btn report-restricted-nav" data-report="billing" onclick="switchReportTab('billing')" style="padding:0.6rem 1.25rem;border:none;background:none;font-weight:600;font-size:0.9rem;cursor:pointer;border-bottom:3px solid transparent;color:var(--text-muted);margin-bottom:-2px; display:none;">
+                <i class="ph ph-currency-circle-dollar"></i> Financial Reports
+            </button>
+            <button id="tab-students-btn" class="report-tab-btn active" onclick="switchReportTab('students')" style="padding:0.6rem 1.25rem;border:none;background:none;font-weight:600;font-size:0.9rem;cursor:pointer;border-bottom:3px solid var(--primary);color:var(--primary);margin-bottom:-2px;">
+                <i class="ph ph-users-three"></i> Student Reports
+            </button>
+            <button id="tab-attendance-btn" class="report-tab-btn" onclick="switchReportTab('attendance')" style="padding:0.6rem 1.25rem;border:none;background:none;font-weight:600;font-size:0.9rem;cursor:pointer;border-bottom:3px solid transparent;color:var(--text-muted);margin-bottom:-2px;">
+                <i class="ph ph-calendar-check"></i> Attendance Reports
+            </button>
+            <button id="tab-meals-btn" class="report-tab-btn report-restricted-nav" data-report="meals" onclick="switchReportTab('meals')" style="padding:0.6rem 1.25rem;border:none;background:none;font-weight:600;font-size:0.9rem;cursor:pointer;border-bottom:3px solid transparent;color:var(--text-muted);margin-bottom:-2px; display:none;">
+                <i class="ph ph-bowl-food"></i> Meals Reports
+            </button>
+            <button id="tab-transport-btn" class="report-tab-btn report-restricted-nav" data-report="transport" onclick="switchReportTab('transport')" style="padding:0.6rem 1.25rem;border:none;background:none;font-weight:600;font-size:0.9rem;cursor:pointer;border-bottom:3px solid transparent;color:var(--text-muted);margin-bottom:-2px; display:none;">
+                <i class="ph ph-bus"></i> Transport Reports
+            </button>
+        </div>
+
+        <!-- Billing Report Section -->
+        <div id="section-billing" class="report-section">
+            <div class="summary-cards-container no-print">
+                <div class="card summary-card"><p>Total Expected</p><h2 id="br-expected">0</h2></div>
+                <div class="card summary-card"><p>Total Collected</p><h2 id="br-collected">0</h2></div>
+                <div class="card summary-card"><p>Total Balance</p><h2 id="br-balance" style="color:var(--danger)">0</h2></div>
+                <div class="card summary-card"><p>Mean Collection / Student</p><h2 id="br-mean">0</h2></div>
+            </div>
+            
+            <div class="card no-print" style="margin-bottom:1.5rem;">
+                <form id="billing-report-form" class="filter-grid">
+                    <div>
+                        <label>Category</label>
+                        <select id="br-category" name="category_id" class="form-control"><option value="">All Categories</option></select>
+                    </div>
+                    <div>
+                        <label>Status</label>
+                        <select id="br-status" name="payment_status" class="form-control">
+                            <option value="">All Statuses</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Partial">Partial</option>
+                            <option value="Unpaid">Unpaid</option>
+                            <option value="Exempt">Exempt</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Class</label>
+                        <input type="text" id="br-class" name="class" class="form-control" placeholder="All Classes">
+                    </div>
+                    <div>
+                        <label>Academic Year</label>
+                        <input type="text" id="br-year" name="academic_year" class="form-control">
+                    </div>
+                    <div>
+                        <label>Term</label>
+                        <select id="br-term" name="school_term" class="form-control">
+                            <option value="">All Terms</option>
+                            <option value="Term 1">Term 1</option>
+                            <option value="Term 2">Term 2</option>
+                            <option value="Term 3">Term 3</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Search Student</label>
+                        <input type="text" id="br-search" class="form-control" placeholder="Name or Adm No...">
+                    </div>
+                </form>
+            </div>
+            
+            <div style="display:flex;gap:0.75rem;margin-bottom:1rem;" class="no-print">
+                <button id="br-export-pdf" class="btn" style="background:#fff;color:#ef4444;border:1px solid #e2e8f0;font-weight:600;">
+                    <i class="ph ph-file-pdf"></i> Export PDF
+                </button>
+                <button id="br-export-excel" class="btn" style="background:#fff;color:#059669;border:1px solid #e2e8f0;font-weight:600;">
+                    <i class="ph ph-microsoft-excel-logo"></i> Export Excel
+                </button>
+            </div>
+
+            <div class="card" style="padding:0;overflow:hidden;">
+                <div class="table-container" style="padding:1.5rem;overflow-x:auto;">
+                    <h3 id="billing-report-title" style="margin-bottom:1.5rem;color:var(--text-main);font-weight:700;border-bottom:1px solid var(--border-color);padding-bottom:0.5rem;">Financial Report</h3>
+                    <table id="billing-report-table" style="width:100%;border-collapse:collapse;">
+                        <thead>
+                            <tr>
+                                <th data-sort="full_name">Student</th>
+                                <th data-sort="admission_number">Adm No.</th>
+                                <th data-sort="class">Class</th>
+                                <th data-sort="category_name">Category</th>
+                                <th>Year/Term</th>
+                                <th data-sort="amount_due" style="text-align:right;">Due</th>
+                                <th data-sort="amount_paid" style="text-align:right;">Paid</th>
+                                <th data-sort="balance" style="text-align:right;">Balance</th>
+                                <th data-sort="payment_status">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="pagination no-print">
+                        <span id="br-page-info">Showing 0-0 of 0</span>
+                        <div class="pagination-controls">
+                            <button id="br-prev">Prev</button>
+                            <button id="br-next">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Report Section -->
+        <div id="section-students" class="report-section active">
+            <div class="summary-cards-container no-print">
+                <div class="card summary-card"><p>Total Enrolled</p><h2 id="sr-total">0</h2></div>
+                <div class="card summary-card"><p>Mean Students / Class</p><h2 id="sr-mean">0</h2></div>
+                <div class="card summary-card"><p>Male Students</p><h2 id="sr-male">0</h2></div>
+                <div class="card summary-card"><p>Female Students</p><h2 id="sr-female">0</h2></div>
+            </div>
+            
+            <div class="card no-print" style="margin-bottom:1.5rem;">
+                <form id="student-report-form" class="filter-grid">
+                    <div>
+                        <label>Class</label>
+                        <input type="text" id="sr-class" name="class" class="form-control" placeholder="All Classes">
+                    </div>
+                    <div>
+                        <label>Gender</label>
+                        <select id="sr-gender" name="gender" class="form-control">
+                            <option value="">All</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Search Student</label>
+                        <input type="text" id="sr-search" class="form-control" placeholder="Name or Adm No...">
+                    </div>
+                </form>
+            </div>
+
+            <div class="card" style="padding:0;overflow:hidden;">
+                <div class="table-container" style="padding:1.5rem;overflow-x:auto;">
+                    <h3 id="student-report-title" style="margin-bottom:1.5rem;color:var(--text-main);font-weight:700;border-bottom:1px solid var(--border-color);padding-bottom:0.5rem;">Student Demographics</h3>
+                    <table id="student-report-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="admission_number">Adm No.</th>
+                                <th data-sort="full_name">Name</th>
+                                <th data-sort="class">Class</th>
+                                <th data-sort="gender">Gender</th>
+                                <th>Parent Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="pagination no-print">
+                        <span id="sr-page-info">Showing 0-0 of 0</span>
+                        <div class="pagination-controls">
+                            <button id="sr-prev">Prev</button>
+                            <button id="sr-next">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Report Section -->
+        <div id="section-attendance" class="report-section">
+            <div class="summary-cards-container no-print">
+                <div class="card summary-card"><p>Total Records</p><h2 id="ar-total">0</h2></div>
+                <div class="card summary-card"><p>Present</p><h2 id="ar-present">0</h2></div>
+                <div class="card summary-card"><p>Absent</p><h2 id="ar-absent">0</h2></div>
+                <div class="card summary-card"><p>Mean Daily Attendance</p><h2 id="ar-mean">0</h2></div>
+            </div>
+            
+            <div class="card no-print" style="margin-bottom:1.5rem;">
+                <form id="attendance-report-form" class="filter-grid">
+                    <div>
+                        <label>Report Type</label>
+                        <select name="type" id="ar-type" class="form-control">
+                            <option value="complete">Complete List</option>
+                            <option value="present">Present Only</option>
+                            <option value="absent">Absent Only</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Start Date</label>
+                        <input type="date" name="start_date" id="ar-start" class="form-control" required>
+                    </div>
+                    <div>
+                        <label>End Date</label>
+                        <input type="date" name="end_date" id="ar-end" class="form-control" required>
+                    </div>
+                    <div>
+                        <label>Class</label>
+                        <input type="text" name="class" id="ar-class" class="form-control" placeholder="All Classes">
+                    </div>
+                    <div>
+                        <label>Search Student</label>
+                        <input type="text" id="ar-search" class="form-control" placeholder="Name or Adm No...">
+                    </div>
+                </form>
+            </div>
+
+            <div class="card" style="padding:0;overflow:hidden;">
+                <div class="table-container" style="padding:1.5rem;overflow-x:auto;">
+                    <h3 id="attendance-report-title" style="margin-bottom:1.5rem;color:var(--text-main);font-weight:700;border-bottom:1px solid var(--border-color);padding-bottom:0.5rem;">Attendance Report</h3>
+                    <table id="attendance-report-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="attendance_date">Date</th>
+                                <th data-sort="admission_number">Adm No.</th>
+                                <th data-sort="full_name">Name</th>
+                                <th data-sort="class">Class</th>
+                                <th data-sort="arrival_time">Time</th>
+                                <th data-sort="status">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="pagination no-print">
+                        <span id="ar-page-info">Showing 0-0 of 0</span>
+                        <div class="pagination-controls">
+                            <button id="ar-prev">Prev</button>
+                            <button id="ar-next">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meals Report Section -->
+        <div id="section-meals" class="report-section">
+            <div class="summary-cards-container no-print">
+                <div class="card summary-card"><p>Total Meals Served</p><h2 id="mr-total">0</h2></div>
+                <div class="card summary-card"><p>Mean Meals / Day</p><h2 id="mr-mean">0</h2></div>
+            </div>
+
+            <div class="card no-print" style="margin-bottom:1.5rem;">
+                <form id="meals-report-form" class="filter-grid">
+                    <div>
+                        <label>Start Date</label>
+                        <input type="date" name="start_date" id="mr-start" class="form-control" required>
+                    </div>
+                    <div>
+                        <label>End Date</label>
+                        <input type="date" name="end_date" id="mr-end" class="form-control" required>
+                    </div>
+                    <div>
+                        <label>Meal Type (Plan)</label>
+                        <select name="meal_type" id="mr-meal-type" class="form-control">
+                            <option value="">All Meals</option>
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dinner">Dinner</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Search Student</label>
+                        <input type="text" id="mr-search" class="form-control" placeholder="Name or Adm No...">
+                    </div>
+                </form>
+            </div>
+
+            <div class="card" style="padding:0;overflow:hidden;">
+                <div class="table-container" style="padding:1.5rem;overflow-x:auto;">
+                    <h3 id="meals-report-title" style="margin-bottom:1.5rem;color:var(--text-main);font-weight:700;border-bottom:1px solid var(--border-color);padding-bottom:0.5rem;">Meals Report</h3>
+                    <table id="meals-report-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="meal_date">Date</th>
+                                <th data-sort="admission_number">Adm No.</th>
+                                <th data-sort="full_name">Name</th>
+                                <th data-sort="class">Class</th>
+                                <th data-sort="meal_type">Meal Type</th>
+                                <th>Scanned By</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="pagination no-print">
+                        <span id="mr-page-info">Showing 0-0 of 0</span>
+                        <div class="pagination-controls">
+                            <button id="mr-prev">Prev</button>
+                            <button id="mr-next">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transport Report Section -->
+        <div id="section-transport" class="report-section">
+            <div class="summary-cards-container no-print">
+                <div class="card summary-card"><p>Total Commutes</p><h2 id="tr-total">0</h2></div>
+                <div class="card summary-card"><p>Mean Daily Commutes</p><h2 id="tr-mean">0</h2></div>
+            </div>
+
+            <div class="card no-print" style="margin-bottom:1.5rem;">
+                <form id="transport-report-form" class="filter-grid">
+                    <div>
+                        <label>Start Date</label>
+                        <input type="date" name="start_date" id="tr-start" class="form-control" required>
+                    </div>
+                    <div>
+                        <label>End Date</label>
+                        <input type="date" name="end_date" id="tr-end" class="form-control" required>
+                    </div>
+                    <div>
+                        <label>Route/Bus</label>
+                        <select name="bus_id" id="tr-bus" class="form-control">
+                            <option value="">All Routes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Search Student</label>
+                        <input type="text" id="tr-search" class="form-control" placeholder="Name or Adm No...">
+                    </div>
+                </form>
+            </div>
+
+            <div class="card" style="padding:0;overflow:hidden;">
+                <div class="table-container" style="padding:1.5rem;overflow-x:auto;">
+                    <h3 id="transport-report-title" style="margin-bottom:1.5rem;color:var(--text-main);font-weight:700;border-bottom:1px solid var(--border-color);padding-bottom:0.5rem;">Transport Report</h3>
+                    <table id="transport-report-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="log_date">Date</th>
+                                <th data-sort="admission_number">Adm No.</th>
+                                <th data-sort="full_name">Name</th>
+                                <th data-sort="bus_name">Route/Bus</th>
+                                <th data-sort="log_time">Time</th>
+                                <th>Scanned By</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="pagination no-print">
+                        <span id="tr-page-info">Showing 0-0 of 0</span>
+                        <div class="pagination-controls">
+                            <button id="tr-prev">Prev</button>
+                            <button id="tr-next">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dynamic-reports-container"></div>
+    </main>
+</body>
+</html>
+

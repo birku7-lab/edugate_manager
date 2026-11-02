@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Management - EduGate School System</title>
+    <meta name="description" content="Manage school billing, payments, and financial records for all students.">
+    <link rel="stylesheet" href="css/style.css?v=2.0">
+
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="js/config.js?v=2.0" defer></script>
+    <script src="js/app.js?v=1.9" defer></script>
+    <script src="js/billing.js?v=1.1" defer></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ph ph-graduation-cap"></i></div>
+            <div class="sidebar-header-text"><h2>EduGate</h2><p>School System</p></div>
+        </div>
+        <div class="sidebar-scroll">
+            <div class="nav-section">
+                <div class="nav-section-title">MANAGEMENT</div>
+                <ul class="sidebar-menu">
+                    <li><a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a></li>
+                    <li><a href="students.html"><i class="ph ph-users-three"></i> Students</a></li>
+                    <li><a href="add_student.html"><i class="ph ph-plus-circle"></i> Add Student</a></li>
+                    <li><a href="scanner.html"><i class="ph ph-scan"></i> Attendance Scanner</a></li>
+                    <li><a href="records.html"><i class="ph ph-list-dashes"></i> Attendance Records</a></li>
+                    <li><a href="reports.html"><i class="ph ph-file-text"></i> Reports</a></li>
+                </ul>
+            </div>
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">FINANCE</div>
+                <ul class="sidebar-menu">
+                    <li class="active"><a href="billing.html"><i class="ph ph-currency-circle-dollar"></i> Billing</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="communication.html#tab-sms"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="communication.html#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="communication.html#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                    <li><a href="sms_logs.html"><i class="ph ph-list"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">OTHER</div>
+                <ul class="sidebar-menu">
+                    <li><a href="settings.html"><i class="ph ph-gear"></i> Settings</a></li>
+                    <li><a href="staff.html"><i class="ph ph-user-gear"></i> Staff Management</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=4f46e5&color=fff" alt="Admin">
+            <div class="sidebar-footer-info"><h4>Admin User</h4><p>Administrator</p></div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="top-header">
+            <div class="header-left">
+                <button class="mobile-toggle"><i class="ph ph-list"></i></button>
+                <div>
+                    <h1><i class="ph ph-currency-circle-dollar" style="color:var(--primary);vertical-align:middle;"></i> Billing Management</h1>
+                    <p>Manage student fees, payments, and financial records</p>
+                </div>
+            </div>
+            <div class="header-right" style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                <button class="btn" id="btn-export-excel" style="background:#fff;color:#059669;border:1px solid #e2e8f0;font-weight:600;">
+                    <i class="ph ph-microsoft-excel-logo"></i> Export Excel
+                </button>
+                <button class="btn" id="btn-export-pdf" style="background:#fff;color:#ef4444;border:1px solid #e2e8f0;font-weight:600;">
+                    <i class="ph ph-file-pdf"></i> Export PDF
+                </button>
+                <button class="btn" id="btn-view-unallocated" onclick="openUnallocatedModal()" style="background:#fff;color:#f59e0b;border:1px solid #e2e8f0;font-weight:600;display:none;">
+                    <i class="ph ph-warning-circle"></i> Unallocated (<span id="unallocated-count">0</span>)
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div id="billing-summary-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;margin-bottom:1.75rem;"></div>
+
+        <!-- Filters -->
+        <div class="card" style="margin-bottom:1.5rem;padding:1.25rem 1.5rem;">
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;">
+                <div style="flex:2;min-width:180px;">
+                    <label style="font-size:0.8rem;color:var(--text-muted);font-weight:600;display:block;margin-bottom:0.4rem;">Search Student</label>
+                    <div style="position:relative;">
+                        <i class="ph ph-magnifying-glass" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
+                        <input type="text" id="billing-search" class="form-control" placeholder="Name or Admission No…" style="padding-left:2rem;">
+                    </div>
+                </div>
+                <div style="flex:1;min-width:130px;">
+                    <label style="font-size:0.8rem;color:var(--text-muted);font-weight:600;display:block;margin-bottom:0.4rem;">Category</label>
+                    <select id="filter-billing-category" class="form-control">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+                <div style="flex:1;min-width:120px;">
+                    <label style="font-size:0.8rem;color:var(--text-muted);font-weight:600;display:block;margin-bottom:0.4rem;">Status</label>
+                    <select id="filter-billing-status" class="form-control">
+                        <option value="">All Statuses</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Partial">Partial</option>
+                        <option value="Unpaid">Unpaid</option>
+                        <option value="Exempt">Exempt</option>
+                    </select>
+                </div>
+                <div style="flex:1;min-width:120px;">
+                    <label style="font-size:0.8rem;color:var(--text-muted);font-weight:600;display:block;margin-bottom:0.4rem;">Class</label>
+                    <select id="filter-billing-class" class="form-control">
+                        <option value="">All Classes</option>
+                    </select>
+                </div>
+                <div style="flex:1;min-width:120px;">
+                    <label style="font-size:0.8rem;color:var(--text-muted);font-weight:600;display:block;margin-bottom:0.4rem;">Academic Year</label>
+                    <input type="text" id="filter-billing-year" class="form-control" placeholder="e.g. 2025/2026">
+                </div>
+                <div style="flex:1;min-width:100px;">
+                    <label style="font-size:0.8rem;color:var(--text-muted);font-weight:600;display:block;margin-bottom:0.4rem;">Term</label>
+                    <select id="filter-billing-term" class="form-control">
+                        <option value="">All Terms</option>
+                        <option value="Term 1">Term 1</option>
+                        <option value="Term 2">Term 2</option>
+                        <option value="Term 3">Term 3</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="btn btn-primary" id="btn-apply-filters" style="height:42px;">
+                        <i class="ph ph-funnel"></i> Filter
+                    </button>
+                </div>
+                <div>
+                    <button class="btn" id="btn-clear-filters" style="height:42px;background:#fff;border:1px solid var(--border-color);color:var(--text-muted);">
+                        <i class="ph ph-x"></i> Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk Action Bar (hidden until students selected) -->
+        <div id="bulk-action-bar" class="card" style="display:none;margin-bottom:1rem;padding:1rem 1.5rem;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:12px;">
+            <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                <span style="color:white;font-weight:700;"><i class="ph ph-check-square"></i> <span id="bulk-selected-count">0</span> selected</span>
+                <div style="height:20px;width:1px;background:rgba(255,255,255,0.3);"></div>
+                <select id="bulk-action-select" class="form-control" style="width:auto;background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);">
+                    <option value="">— Choose Action —</option>
+
+                    <optgroup label="Update Status">
+                        <option value="mark_paid">Mark as Paid</option>
+                        <option value="mark_partial">Mark as Partial</option>
+                        <option value="mark_unpaid">Mark as Unpaid</option>
+                        <option value="mark_exempt">Mark as Exempt</option>
+                    </optgroup>
+                </select>
+                <select id="bulk-category-select" class="form-control" style="width:auto;display:none;background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);">
+                    <option value="">All Categories</option>
+                </select>
+                <button class="btn" id="btn-bulk-apply" style="background:white;color:#4f46e5;font-weight:700;">
+                    <i class="ph ph-lightning"></i> Apply
+                </button>
+                <button class="btn" id="btn-bulk-cancel" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);margin-left:auto;">
+                    <i class="ph ph-x"></i> Cancel
+                </button>
+            </div>
+        </div>
+
+        <!-- Students Billing Table -->
+        <div class="card" style="padding:0;overflow:hidden;">
+            <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;">
+                <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:var(--text-main);">
+                    <i class="ph ph-users-three" style="color:var(--primary);"></i> Student Billing Records
+                </h3>
+                <span id="billing-record-count" style="font-size:0.85rem;color:var(--text-muted);font-weight:500;"></span>
+            </div>
+            <div class="table-responsive" style="overflow-x:auto;">
+                <table id="billing-table" style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:var(--bg-color);">
+                            <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;white-space:nowrap;">
+                                <label class="billing-checkbox-label">
+                                    <input type="checkbox" id="select-all-billing">
+                                </label>
+                            </th>
+                            <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">STUDENT</th>
+                            <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">CLASS</th>
+                            <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">ADM NO.</th>
+                            <th id="billing-cat-headers" style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">BILLING CATEGORIES</th>
+                            <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">BALANCE</th>
+                            <th style="padding:0.75rem 1rem;text-align:left;font-size:0.8rem;color:var(--text-muted);font-weight:600;">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billing-tbody">
+                        <tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text-muted);">
+                            <i class="ph ph-spinner" style="font-size:2rem;animation:spin 1s linear infinite;"></i><br>Loading billing data…
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- ── Billing Record Modal ─────────────────────────────────────────────── -->
+    <div id="billing-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:2000;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s;">
+        <div style="background:var(--card-bg);border-radius:20px;width:95%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,0.3);position:relative;">
+            <div style="padding:1.5rem 2rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:20px 20px 0 0;">
+                <div>
+                    <h2 id="billing-modal-title" style="margin:0;font-size:1.2rem;color:white;font-weight:700;"></h2>
+                    <p id="billing-modal-subtitle" style="margin:0;color:rgba(255,255,255,0.8);font-size:0.85rem;"></p>
+                </div>
+                <button onclick="closeBillingModal()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:36px;height:36px;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
+            </div>
+            <div id="billing-modal-content" style="padding:1.5rem 2rem;"></div>
+        </div>
+    </div>
+
+
+    <!-- ── Payment Update Modal (Record Payment) ────────────────────────────────────────────── -->
+    <div id="payment-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:2200;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s;">
+        <div style="background:var(--card-bg);border-radius:16px;width:95%;max-width:550px;box-shadow:0 25px 50px rgba(0,0,0,0.3);overflow:hidden;">
+            <div style="padding:1.25rem 1.5rem;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:space-between;">
+                <h3 id="payment-modal-title" style="margin:0;color:white;font-size:1.1rem;font-weight:700;"><i class="ph ph-plus-circle"></i> Record Payment</h3>
+                <button onclick="closePaymentModal()" style="background:rgba(255,255,255,0.2);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem;">&times;</button>
+            </div>
+            <form id="payment-form" style="padding:1.5rem;">
+                <input type="hidden" id="payment-billing-id">
+                
+                <div style="margin-bottom:1.25rem;padding:1rem;background:var(--bg-color);border-radius:8px;display:flex;flex-direction:column;gap:0.75rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:0.85rem;color:var(--text-muted);font-weight:600;">Billing Category</span>
+                        <span id="payment-category-display" style="font-weight:700;color:var(--text-main);">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:0.85rem;color:var(--text-muted);font-weight:600;">Total Amount Due</span>
+                        <span id="payment-due-display" style="font-weight:700;color:var(--text-main);">KES 0.00</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:0.85rem;color:var(--text-muted);font-weight:600;">Amount Already Paid</span>
+                        <span id="payment-paid-display" style="font-weight:700;color:#059669;">KES 0.00</span>
+                    </div>
+                    <div style="height:1px;background:var(--border-color);margin:0.25rem 0;"></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:0.85rem;color:var(--text-muted);font-weight:600;">Remaining Balance</span>
+                        <span id="payment-balance-display" style="font-weight:700;font-size:1.1rem;color:#ef4444;">KES 0.00</span>
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                    <div class="form-group">
+                        <label>Amount Being Paid (KES) *</label>
+                        <input type="number" id="payment-amount-being-paid" class="form-control" min="0.01" step="0.01" style="font-weight:700;color:#059669;" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Date *</label>
+                        <input type="date" id="payment-date" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                    <div class="form-group">
+                        <label>Payment Method *</label>
+                        <select id="payment-method" class="form-control" required>
+                            <option value="Cash">Cash</option>
+                            <option value="M-Pesa">M-Pesa</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Card">Card</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Reference Number</label>
+                        <input type="text" id="payment-reference" class="form-control" placeholder="e.g. QFE9X...">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="payment-notes" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+                </div>
+                
+                <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.5rem;">
+                    <button type="button" onclick="closePaymentModal()" class="btn" style="background:var(--bg-color);color:var(--text-muted);">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-payment"><i class="ph ph-floppy-disk"></i> Record Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Unallocated Payments Modal ────────────────────────────────────────────── -->
+    <div id="unallocated-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:2200;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s;">
+        <div style="background:var(--card-bg);border-radius:16px;width:95%;max-width:800px;max-height:90vh;box-shadow:0 25px 50px rgba(0,0,0,0.3);overflow:hidden;display:flex;flex-direction:column;">
+            <div style="padding:1.25rem 1.5rem;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:space-between;">
+                <h3 style="margin:0;color:white;font-size:1.1rem;font-weight:700;"><i class="ph ph-warning-circle"></i> Unallocated SMS Payments</h3>
+                <button onclick="closeUnallocatedModal()" style="background:rgba(255,255,255,0.2);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem;">&times;</button>
+            </div>
+            <div style="padding:1.5rem;overflow-y:auto;flex:1;">
+                <p style="margin-top:0;color:var(--text-muted);font-size:0.9rem;">These payments were received via SMS but could not be automatically matched to a student's parent phone number. Please assign them manually.</p>
+                <div class="table-responsive">
+                    <table style="width:100%;border-collapse:collapse;margin-top:1rem;">
+                        <thead>
+                            <tr style="background:var(--bg-color);border-bottom:1px solid var(--border-color);">
+                                <th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:var(--text-muted);">DATE</th>
+                                <th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:var(--text-muted);">SENDER</th>
+                                <th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:var(--text-muted);">RECEIPT</th>
+                                <th style="padding:0.75rem;text-align:left;font-size:0.8rem;color:var(--text-muted);">AMOUNT</th>
+                                <th style="padding:0.75rem;text-align:center;font-size:0.8rem;color:var(--text-muted);">ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="unallocated-tbody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ── Smart Assign Unallocated Modal ────────────────────────────────────────────── -->
+    <div id="assign-unallocated-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:2300;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s;">
+        <div style="background:var(--card-bg);border-radius:16px;width:95%;max-width:600px;max-height:90vh;box-shadow:0 25px 50px rgba(0,0,0,0.3);overflow:hidden;display:flex;flex-direction:column;">
+            <div style="padding:1.25rem 1.5rem;background:linear-gradient(135deg,#059669,#10b981);display:flex;align-items:center;justify-content:space-between;">
+                <h3 style="margin:0;color:white;font-size:1.1rem;font-weight:700;"><i class="ph ph-check-circle"></i> Assign Payment</h3>
+                <button onclick="closeAssignModal()" style="background:rgba(255,255,255,0.2);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem;">&times;</button>
+            </div>
+            <div style="padding:1.5rem;overflow-y:auto;flex:1;">
+                
+                <div style="background:var(--bg-color);padding:1rem;border-radius:12px;margin-bottom:1.5rem;border:1px solid var(--border-color);">
+                    <div style="font-size:0.85rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:0.5rem;">Payment Details</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <div style="font-weight:700;color:var(--text-color);" id="assign-sender-name">-</div>
+                            <div style="font-size:0.85rem;color:var(--text-muted);" id="assign-sender-phone">-</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:800;color:#059669;font-size:1.2rem;" id="assign-amount">-</div>
+                            <div style="font-size:0.8rem;color:var(--text-muted);" id="assign-receipt">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:1.5rem;">
+                    <label style="display:block;font-size:0.9rem;font-weight:600;margin-bottom:0.5rem;color:var(--text-color);">Step 1: Select Student</label>
+                    <div id="smart-suggestions-container" style="margin-bottom:1rem;display:none;">
+                        <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem;"><i class="ph ph-magic-wand"></i> Smart Suggestions:</div>
+                        <div id="smart-suggestions-list" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
+                    </div>
+                    
+                    <div style="position:relative;">
+                        <i class="ph ph-magnifying-glass" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
+                        <input type="text" id="assign-student-search" placeholder="Or search for any student by name..." style="width:100%;padding:0.75rem 1rem 0.75rem 2.5rem;border:1px solid var(--border-color);border-radius:8px;font-size:0.95rem;background:var(--bg-color);color:var(--text-color);box-sizing:border-box;">
+                        <div id="assign-student-dropdown" style="display:none;position:absolute;top:100%;left:0;width:100%;background:var(--card-bg);border:1px solid var(--border-color);border-radius:8px;box-shadow:0 10px 25px rgba(0,0,0,0.1);max-height:200px;overflow-y:auto;z-index:10;margin-top:0.25rem;"></div>
+                    </div>
+                    
+                    <div id="selected-student-display" style="display:none;margin-top:0.75rem;padding:0.75rem;background:rgba(5,150,105,0.1);border:1px solid rgba(5,150,105,0.3);border-radius:8px;align-items:center;justify-content:space-between;">
+                        <div>
+                            <div style="font-size:0.8rem;color:var(--text-muted);">Selected Student:</div>
+                            <div style="font-weight:700;color:#059669;" id="selected-student-name"></div>
+                        </div>
+                        <button onclick="clearSelectedStudent()" style="background:transparent;border:none;color:var(--text-muted);cursor:pointer;"><i class="ph ph-x-circle" style="font-size:1.2rem;"></i></button>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display:block;font-size:0.9rem;font-weight:600;margin-bottom:0.5rem;color:var(--text-color);">Step 2: Payment Purpose</label>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                        <label style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem;border:1px solid #059669;border-radius:8px;background:rgba(5,150,105,0.05);cursor:pointer;transition:all 0.2s;" id="purpose-label-auto">
+                            <input type="radio" name="payment_purpose" value="auto" checked onchange="toggleSpecificServices(false)" style="accent-color:#059669;">
+                            <div>
+                                <div style="font-weight:600;font-size:0.9rem;color:#059669;">Auto-Distribute</div>
+                                <div style="font-size:0.75rem;color:var(--text-muted);">Pays off all unpaid bills (oldest first)</div>
+                            </div>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-color);cursor:pointer;transition:all 0.2s;" id="purpose-label-specific">
+                            <input type="radio" name="payment_purpose" value="specific" onchange="toggleSpecificServices(true)" style="accent-color:#059669;">
+                            <div>
+                                <div style="font-weight:600;font-size:0.9rem;color:var(--text-color);">Specific Services</div>
+                                <div style="font-size:0.75rem;color:var(--text-muted);">Choose exact categories to pay</div>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div id="specific-services-container" style="display:none;background:var(--bg-color);border:1px solid var(--border-color);border-radius:8px;padding:1rem;">
+                        <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.75rem;">Select one or more categories:</div>
+                        <div id="assign-categories-list" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));gap:0.75rem;">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div style="padding:1.25rem 1.5rem;border-top:1px solid var(--border-color);display:flex;justify-content:flex-end;gap:1rem;background:var(--bg-color);">
+                <button onclick="closeAssignModal()" class="btn" style="background:transparent;color:var(--text-muted);border:1px solid var(--border-color);">Cancel</button>
+                <button onclick="submitAssignUnallocated()" class="btn btn-primary" style="background:#059669;border:none;">Confirm & Assign</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+

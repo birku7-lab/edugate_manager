@@ -1,0 +1,39 @@
+# Build outputs
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.user
+*.suo
+*.cache
+
+# Visual Studio
+.vs/
+*.sln.docstates
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+venv/
+env/
+.venv/
+
+# Dashboard data (runtime - never commit school data)
+developer-cloud-dashboard/data/
+developer-cloud-dashboard/uploads/updates/*.zip
+
+# Secrets & logs
+*.log
+*.tmp
+*.bak
+secrets.json
+appsettings.local.json
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini

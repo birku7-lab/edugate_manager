@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communication - EduGate School System</title>
+    <link rel="stylesheet" href="css/style.css?v=1.3">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="js/config.js?v=1.3" defer></script>
+    <script src="js/app.js?v=1.9" defer></script>
+    <script src="js/settings.js?v=1.6" defer></script>
+    <style>
+        .settings-container {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        .settings-sidebar {
+            width: 250px;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .settings-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .settings-menu li {
+            margin-bottom: 0.5rem;
+        }
+        .settings-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.8rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .settings-menu a:hover {
+            background: var(--bg-color);
+            color: var(--primary);
+        }
+        .settings-menu a.active {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+        }
+        .settings-content {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            min-height: 600px;
+        }
+        .settings-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .settings-section.active {
+            display: block;
+        }
+        .section-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .section-header h2 {
+            margin: 0;
+            color: var(--text-main);
+        }
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toggles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .setting-row:last-child { border-bottom: none; }
+        .setting-info h4 { margin: 0; color: var(--text-main); font-size: 1rem; }
+        .setting-info p { margin: 5px 0 0 0; color: var(--text-muted); font-size: 0.85rem; }
+
+        .color-picker {
+            display: flex; gap: 10px; flex-wrap: wrap;
+        }
+        .color-swatch {
+            width: 35px; height: 35px; border-radius: 50%; cursor: pointer;
+            border: 2px solid transparent; transition: var(--transition);
+        }
+        .color-swatch.active { border-color: var(--text-main); transform: scale(1.1); }
+    </style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ph ph-graduation-cap"></i></div>
+            <div class="sidebar-header-text">
+                <h2>EduGate</h2>
+                <p>Attendance System</p>
+            </div>
+        </div>
+        
+        <div class="sidebar-scroll">
+            <div class="nav-section">
+                <div class="nav-section-title">MAIN MENU</div>
+                <ul class="sidebar-menu">
+                    <li><a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a></li>
+                    <li><a href="scanner.html"><i class="ph ph-scan"></i> Scanner</a></li>
+                    <li><a href="records.html"><i class="ph ph-list-dashes"></i> Records</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">MANAGEMENT</div>
+                <ul class="sidebar-menu">
+                    <li><a href="students.html"><i class="ph ph-users"></i> Students</a></li>
+                    <li><a href="add_student.html"><i class="ph ph-user-plus"></i> Add Student</a></li>
+                    <li><a href="reports.html"><i class="ph ph-chart-bar"></i> Reports</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">FINANCE</div>
+                <ul class="sidebar-menu">
+                    <li><a href="billing.html"><i class="ph ph-currency-circle-dollar"></i> Billing</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="communication.html#tab-sms"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="communication.html#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="communication.html#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                    <li><a href="sms_logs.html"><i class="ph ph-list"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">SYSTEM</div>
+                <ul class="sidebar-menu">
+                    <li class="active"><a href="settings.html"><i class="ph ph-gear"></i> Settings</a></li>
+                    <li><a href="staff.html"><i class="ph ph-user-gear"></i> Staff Management</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <button class="mobile-toggle"><i class="ph ph-list"></i></button>
+        
+        <div class="top-header">
+            <div class="header-left">
+                <h1><i class="ph ph-chat-circle-text"></i> Communication</h1>
+                <p>Manage SMS, Message Templates and Bulk Messaging</p>
+            </div>
+        </div>
+
+        <div class="settings-container">
+            <aside class="settings-sidebar">
+                <ul class="settings-menu">
+                    <li><a href="#tab-sms" class="active"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                </ul>
+            </aside>
+
+            <div class="settings-content">
+<div id="tab-sms" class="settings-section admin-only-nav active">
+                    <div class="section-header">
+                        <h2><i class="ph ph-chat-circle-text"></i> SMS Configuration</h2>
+                        <p>Configure the FluxSMS API integration for automated parent notifications.</p>
+                    </div>
+
+                    <form id="form-sms-settings" class="settings-form" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label>FluxSMS API Token</label>
+                            <input type="text" name="sms_api_token" id="sms_api_token" class="form-control" placeholder="Bearer Token...">
+                        </div>
+                        <div class="form-group">
+                            <label>Sender ID (Alphanumeric)</label>
+                            <input type="text" name="sms_sender_id" id="sms_sender_id" class="form-control" placeholder="Optional. e.g. SCHOOL">
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Save SMS Settings</button>
+                    </form>
+
+                    <div style="background:var(--bg-color); padding:1.5rem; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+                        <h4 style="margin-bottom: 1rem;">Test SMS Integration</h4>
+                        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                            <input type="text" id="test_sms_phone" class="form-control" placeholder="Enter test phone number (e.g. +254712345678)" style="flex:1; min-width:250px;">
+                            <button type="button" class="btn btn-success" id="btn-test-sms"><i class="ph ph-paper-plane-tilt"></i> Send Test SMS</button>
+                        </div>
+                        <p id="test-sms-result" style="margin-top: 1rem; font-size: 0.9rem;"></p>
+                    </div>
+                
+                    <div class="section-header" style="margin-top: 3rem;">
+                        <h2><i class="ph ph-bell-ringing"></i> Message Triggers</h2>
+                        <p>Turn on/off automated SMS notifications for specific events without disabling the features themselves.</p>
+                    </div>
+                    <form id="form-sms-triggers" class="settings-form" style="margin-bottom: 2rem;">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Admission SMS</h4>
+                                <p>Send a welcome message when a new student is admitted.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="sms_enable_admission" id="sms_enable_admission" value="1">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Attendance SMS</h4>
+                                <p>Send a notification when a student scans in/out of school.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="sms_enable_attendance" id="sms_enable_attendance" value="1">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Transport SMS</h4>
+                                <p>Send a notification when a student boards/alights the school bus.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="sms_enable_transport" id="sms_enable_transport" value="1">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Fee Payment SMS</h4>
+                                <p>Send a receipt message when a fee payment is recorded.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="sms_enable_billing" id="sms_enable_billing" value="1">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Fee Denial Auto-SMS</h4>
+                                <p>Send an SMS when a student is denied entry due to unpaid mandatory fees.</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="sms_enable_denial" id="sms_enable_denial" value="1">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Save Triggers</button>
+                    </form>
+</div>
+
+                
+<div id="tab-message-templates" class="settings-section admin-only-nav">
+                    <div class="section-header">
+                        <h2><i class="ph ph-files"></i> Default Message Templates</h2>
+                        <p>Customize automated SMS texts. Leave empty to use system defaults.</p>
+                    </div>
+                    
+                    <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:1rem; border-radius:var(--radius-md); margin-bottom:1.5rem;">
+                        <h4 style="color:#1d4ed8; margin-bottom:0.5rem; font-size:0.9rem;"><i class="ph ph-info"></i> Available Placeholders:</h4>
+                        <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:0.8rem; color:#1e40af; font-family:monospace;">
+                            <span>{Student Name}</span>
+                            <span>{Parent Name}</span>
+                            <span>{Admission Number}</span>
+                            <span>{Class}</span>
+                            <span>{School Name}</span>
+                            <span>{Amount Paid}</span>
+                            <span>{Balance}</span>
+                            <span>{Payment Date}</span>
+                            <span>{Current Term}</span>
+                            <span>{Academic Year}</span>
+                        </div>
+                    </div>
+
+                    <form id="form-sms-templates" class="settings-form">
+                        <div class="form-group">
+                            <label>Admission Confirmation SMS</label>
+                            <textarea name="sms_template_admission" class="form-control" rows="2" placeholder="e.g. Welcome {Student Name} to {School Name}...">Welcome {Student Name} to {School Name}...</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Fee Payment SMS</label>
+                            <textarea name="sms_template_payment" class="form-control" rows="2" placeholder="e.g. Thanks for the payment of {Amount Paid} for {Student Name}...">Thanks for the payment of {Amount Paid} for {Student Name}...</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Fee Balance Reminder</label>
+                            <textarea name="sms_template_balance" class="form-control" rows="2" placeholder="e.g. Please clear the balance of {Balance} for {Student Name}...">Please clear the balance of {Balance} for {Student Name}...</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Attendance (Absent) SMS</label>
+                            <textarea name="sms_template_attendance" class="form-control" rows="2" placeholder="e.g. {Student Name} was marked absent today at {School Name}...">{Student Name} was marked absent today at {School Name}...</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Fee Denial Auto-SMS (Sent Home)</label>
+                            <textarea name="sms_template_denial" class="form-control" rows="3" placeholder="e.g. Dear Parent, {Student Name} was not allowed into school today...">Dear Parent, {Student Name} was not allowed into school today because their fee balance is Ksh {Balance}. Please clear the fee immediately. The student has been sent home. For inquiries, contact us at {School Phone}.</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Transport Boarding SMS</label>
+                            <textarea name="sms_template_transport" class="form-control" rows="2" placeholder="e.g. {Student Name} has boarded the bus.">{Student Name} has boarded the bus.</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Examination / Report Card SMS</label>
+                            <textarea name="sms_template_exam" class="form-control" rows="2">Term {Current Term} results for {Student Name} are out. Please collect the report card from the school.</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>General Announcements Template</label>
+                            <textarea name="sms_template_announcement" class="form-control" rows="2">Dear {Parent Name}, please note this important update from {School Name}.</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Save Templates</button>
+                    </form>
+                </div>
+
+                
+<div id="tab-bulk-sms" class="settings-section admin-only-nav">
+                    <div class="section-header">
+                        <h2><i class="ph ph-paper-plane-right"></i> Send Bulk SMS</h2>
+                        <p>Target specific groups of parents/guardians to send announcements.</p>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap: 2rem;">
+                        <!-- Filters Column -->
+                        <div style="background:var(--bg-color); padding:1.5rem; border-radius:var(--radius-lg); border:1px solid var(--border-color);">
+                            <h3 style="margin-bottom:1rem; font-size:1.1rem;">1. Select Recipients</h3>
+                            
+                            <div class="form-group">
+                                <label>Target Group</label>
+                                <select id="bulk_target_type" class="form-control" onchange="toggleBulkFilters()">
+                                    <option value="all">All Parents in School</option>
+                                    <option value="classes">Parents of Selected Classes</option>
+                                    <option value="balance_has">Parents with Fee Balances</option>
+                                    <option value="balance_paid">Parents with Fully Paid Fees</option>
+                                    <option value="absent">Parents of Absent Students (Today)</option>
+                                    <option value="transport">Parents using School Transport</option>
+                                    <option value="staff">Staff Members (Unavailable)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="bulk_filter_classes" style="display:none;">
+                                <label>Select Classes (Multi-select)</label>
+                                <select id="bulk_target_classes" class="form-control" multiple style="height:120px;">
+                                    <!-- Populated dynamically -->
+                                </select>
+                                <small style="color:var(--text-muted);">Hold Ctrl (or Cmd) to select multiple</small>
+                            </div>
+
+                            <button type="button" class="btn" style="width:100%; background:#e2e8f0; color:#334155;" onclick="calculateRecipients()">
+                                <i class="ph ph-users"></i> Calculate Recipients
+                            </button>
+
+                            <div id="bulk_recipient_stats" style="margin-top:1.5rem; text-align:center; display:none;">
+                                <div style="font-size:2rem; font-weight:700; color:var(--primary);" id="bulk_count">0</div>
+                                <div style="color:var(--text-muted); font-size:0.9rem;">Total Recipients Found</div>
+                            </div>
+                        </div>
+
+                        <!-- Compose Column -->
+                        <div style="display:flex; flex-direction:column;">
+                            <h3 style="margin-bottom:1rem; font-size:1.1rem;">2. Compose Message</h3>
+                            <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
+                                <textarea id="bulk_message" class="form-control" style="flex:1; min-height:150px; resize:none;" placeholder="Type your message here... You can use placeholders like {Student Name} or {School Name}."></textarea>
+                                
+                                <div style="display:flex; justify-content:space-between; margin-top:0.5rem; font-size:0.85rem; color:var(--text-muted);">
+                                    <span>Characters: <b id="bulk_char_count">0</b></span>
+                                    <span>Estimated Cost: <b id="bulk_cost">0</b> SMS Units</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Schedule (Optional)</label>
+                                <input type="datetime-local" id="bulk_schedule_time" class="form-control">
+                                <small style="color:var(--text-muted);">Leave blank to send immediately.</small>
+                            </div>
+
+                            <div style="display:flex; gap:1rem; margin-top:1rem;">
+                                <button type="button" class="btn" style="flex:1; background:#f1f5f9; color:#475569;" onclick="previewBulkMessage()">
+                                    <i class="ph ph-eye"></i> Preview
+                                </button>
+                                <button type="button" class="btn btn-primary" style="flex:2;" onclick="sendBulkSMSAction()">
+                                    <i class="ph ph-paper-plane-right"></i> Send / Schedule Broadcast
+                                </button>
+                            </div>
+                            
+                            <div style="margin-top:1.5rem; text-align:right;">
+                                <button type="button" class="btn btn-success" onclick="runScheduledSMS()">
+                                    <i class="ph ph-play-circle"></i> Run Scheduled SMS Now (Admin)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+            </div>
+        </div>
+    </main>
+
+
+<script src="js/bulk_sms.js"></script>
+</body>
+</html>
+
+
+
+
+
+

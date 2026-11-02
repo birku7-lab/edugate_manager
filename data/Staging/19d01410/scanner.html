@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner - EduGate School System</title>
+    <link rel="stylesheet" href="css/style.css?v=1.3">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="https://unpkg.com/html5-qrcode" defer></script>
+    <script src="js/config.js?v=1.3" defer></script>
+    <script src="js/app.js?v=1.9" defer></script>
+    <script src="js/scanner.js?v=1.4" defer></script>
+    <style>
+        .scanner-container { display: flex; gap: 2rem; flex-wrap: wrap; }
+        .camera-section { flex: 1; min-width: 300px; }
+        .result-section { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 1rem; }
+        #reader { width: 100%; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
+        .scan-result-card { background: white; border-radius: var(--radius-lg); padding: 2rem; text-align: center; box-shadow: var(--shadow-md); display: none; }
+        .scan-result-card.success { border-top: 5px solid var(--success); display: block; }
+        .scan-result-card.duplicate { border-top: 5px solid var(--warning); display: block; }
+        .scan-result-card.error { border-top: 5px solid var(--danger); display: block; }
+        .status-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+        #usb-scanner-input { position: absolute; left: -9999px; }
+    </style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ph ph-graduation-cap"></i></div>
+            <div class="sidebar-header-text">
+                <h2>EduGate</h2><p>School System</p>
+            </div>
+        </div>
+        <div class="sidebar-scroll">
+            <div class="nav-section">
+                <div class="nav-section-title">MANAGEMENT</div>
+                <ul class="sidebar-menu">
+                    <li><a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a></li>
+                    <li><a href="students.html"><i class="ph ph-users-three"></i> Students</a></li>
+                    <li><a href="add_student.html"><i class="ph ph-plus-circle"></i> Add Student</a></li>
+                    <li class="active"><a href="scanner.html"><i class="ph ph-scan"></i> Attendance Scanner</a></li>
+                    <li><a href="records.html"><i class="ph ph-list-dashes"></i> Attendance Records</a></li>
+                    <li><a href="reports.html"><i class="ph ph-file-text"></i> Reports</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="communication.html#tab-sms"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="communication.html#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="communication.html#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                    <li><a href="sms_logs.html"><i class="ph ph-list"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">OTHER</div>
+                <ul class="sidebar-menu">
+                    <li><a href="settings.html"><i class="ph ph-gear"></i> Settings</a></li>
+                    <li><a href="staff.html"><i class="ph ph-user-gear"></i> Staff Management</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="sidebar-footer">
+            <img src="https://ui-avatars.com/api/?name=Admin+User&background=4f46e5&color=fff" alt="Admin">
+            <div class="sidebar-footer-info"><h4>Admin User</h4><p>Administrator</p></div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-header">
+            <div class="header-left">
+                <button class="mobile-toggle"><i class="ph ph-list"></i></button>
+                <div>
+                    <h1>Attendance Scanner</h1>
+                    <p>Scan student QR codes to mark attendance.</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-widget" style="color: var(--primary);">
+                    <i class="ph ph-scan"></i>
+                    <span id="scan-status">Ready to Scan...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="scanner-container">
+            <div class="camera-section card">
+                <h3 style="margin-bottom: 1rem; text-align: center; color: var(--text-main);">Webcam Scanner</h3>
+                <div id="reader"></div>
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <button id="pause-resume-btn" class="btn btn-warning" onclick="togglePauseResume()" style="padding: 0.8rem 2rem; font-size: 1.1rem; font-weight: 600;">
+                        <i class="ph ph-pause"></i> Pause Scanner
+                    </button>
+                </div>
+                <div style="margin-top: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; background: var(--bg-color); padding: 1rem; border-radius: var(--radius-md);">
+                    <i class="ph ph-info" style="font-size: 1.2rem; color: var(--primary); vertical-align: middle;"></i> Ensure camera permissions are granted.<br>
+                    <strong>USB Scanner:</strong> Just scan anytime, it runs in the background.
+                </div>
+            </div>
+
+            <div class="result-section">
+                <!-- Placeholder when idle -->
+                <div id="idle-card" class="card" style="text-align: center; padding: 4rem 2rem; display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                    <div style="font-size: 5rem; opacity: 0.2; color: var(--text-muted);"><i class="ph ph-camera"></i></div>
+                    <h3 style="color: var(--text-muted); margin-top: 1rem; font-weight: 500;">Waiting for scan...</h3>
+                </div>
+
+                <!-- Result Card -->
+                <div id="result-card" class="scan-result-card">
+                    <div id="result-icon" class="status-icon"><i class="ph-fill ph-check-circle" style="color: var(--success);"></i></div>
+                    <h2 id="result-message" style="margin-bottom: 1.5rem; color: var(--success);">Attendance Recorded Successfully</h2>
+                    
+                    <img id="result-photo" src="" alt="Student Photo" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin:0 auto 1rem;display:block;background:#f1f5f9;border:4px solid white;box-shadow:var(--shadow-sm);">
+                    
+                    <h3 id="result-name" style="margin-bottom: 0.5rem; font-size: 1.4rem; color: var(--text-main);">-</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; background: var(--bg-color); padding: 1.5rem; border-radius: var(--radius-md); margin-top: 1.5rem;">
+                        <div><strong style="color:var(--text-muted);font-size:0.8rem;text-transform:uppercase;">Admission No:</strong><br><span id="result-adm" style="color:var(--text-main);font-weight:500;">-</span></div>
+                        <div><strong style="color:var(--text-muted);font-size:0.8rem;text-transform:uppercase;">Class:</strong><br><span id="result-class" style="color:var(--text-main);font-weight:500;">-</span></div>
+                        <div><strong style="color:var(--text-muted);font-size:0.8rem;text-transform:uppercase;">Gender:</strong><br><span id="result-gender" style="color:var(--text-main);font-weight:500;">-</span></div>
+                        <div><strong style="color:var(--text-muted);font-size:0.8rem;text-transform:uppercase;">Scan Time:</strong><br><span id="result-time" style="font-weight:700;color:var(--primary);">-</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <input type="text" id="usb-scanner-input" autofocus>
+    </main>
+</body>
+</html>
+
+
+

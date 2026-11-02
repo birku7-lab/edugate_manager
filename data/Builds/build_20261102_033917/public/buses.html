@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Management - EduGate</title>
+    <link rel="stylesheet" href="css/style.css?v=1.3">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <script src="js/config.js?v=1.3" defer></script>
+    <script src="js/app.js?v=1.9" defer></script>
+    <script src="js/buses.js?v=1.1" defer></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-icon"><i class="ph ph-graduation-cap"></i></div>
+            <div class="sidebar-header-text">
+                <h2>EduGate</h2>
+                <p>Attendance System</p>
+            </div>
+        </div>
+        
+        <div class="sidebar-scroll">
+            <div class="nav-section">
+                <div class="nav-section-title">MAIN MENU</div>
+                <ul class="sidebar-menu">
+                    <li><a href="index.html"><i class="ph ph-squares-four"></i> Dashboard</a></li>
+                    <li class="scanner-attendance"><a href="scanner.html?mode=attendance"><i class="ph ph-scan"></i> Attendance Scanner</a></li>
+                    <li class="scanner-meals"><a href="scanner.html?mode=meals"><i class="ph ph-bowl-food"></i> Meals Scanner</a></li>
+                    <li class="scanner-transport"><a href="scanner.html?mode=transport"><i class="ph ph-bus"></i> Transport Scanner</a></li>
+                    <li><a href="records.html"><i class="ph ph-list-dashes"></i> Records</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">MANAGEMENT</div>
+                <ul class="sidebar-menu">
+                    <li><a href="students.html"><i class="ph ph-users"></i> Students</a></li>
+                    <li><a href="add_student.html"><i class="ph ph-user-plus"></i> Add Student</a></li>
+                    <li><a href="reports.html"><i class="ph ph-chart-bar"></i> Reports</a></li>
+                </ul>
+            </div>
+
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">FINANCE</div>
+                <ul class="sidebar-menu">
+                    <li><a href="billing.html"><i class="ph ph-currency-circle-dollar"></i> Billing</a></li>
+                </ul>
+            </div>
+
+            
+            <div class="nav-section admin-only-nav">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <ul class="sidebar-menu">
+                    <li><a href="communication.html#tab-sms"><i class="ph ph-chat-circle-text"></i> SMS Settings</a></li>
+                    <li><a href="communication.html#tab-message-templates"><i class="ph ph-files"></i> Message Templates</a></li>
+                    <li><a href="communication.html#tab-bulk-sms"><i class="ph ph-paper-plane-right"></i> Bulk SMS</a></li>
+                    <li><a href="sms_logs.html"><i class="ph ph-list"></i> SMS Logs</a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">SYSTEM</div>
+                <ul class="sidebar-menu">
+                    <li><a href="settings.html"><i class="ph ph-gear"></i> Settings</a></li>
+                    <li class="admin-only-nav"><a href="buses.html"><i class="ph ph-bus"></i> Bus Management</a></li>
+                    <li><a href="staff.html"><i class="ph ph-user-gear"></i> Staff Management</a></li>
+                    
+                    <li class="active"><a href="buses.html"><i class="ph ph-bus"></i> Bus Management</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <img src="https://ui-avatars.com/api/?name=User&background=4f46e5&color=fff" alt="User" id="sidebar-user-avatar">
+            <div class="sidebar-footer-info">
+                <h4>User</h4>
+                <p>Role</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <button class="mobile-toggle">
+            <i class="ph ph-list"></i>
+        </button>
+        
+        <div class="top-header">
+            <div class="header-left">
+                <h1>Bus Management</h1>
+                <p>Manage transport fleet, capacity, and routes.</p>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    <i class="ph ph-plus"></i> Add New Bus
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="table-container">
+                <table id="buses-table">
+                    <thead>
+                        <tr>
+                            <th>Bus Name</th>
+                            <th>Reg Number</th>
+                            <th>Driver</th>
+                            <th>Route</th>
+                            <th>Capacity</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="buses-list">
+                        <!-- Fetched from JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Bus Modal -->
+    <div id="add-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Add Bus</h2>
+                <span class="close" onclick="closeAddModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="add-bus-form">
+                    <div class="form-group">
+                        <label>Bus Name / Tag</label>
+                        <input type="text" name="name" class="form-control" required placeholder="e.g. Bus A">
+                    </div>
+                    <div class="form-group">
+                        <label>Registration Number</label>
+                        <input type="text" name="registration_number" class="form-control" required placeholder="e.g. KCA 123X">
+                    </div>
+                    <div class="form-group">
+                        <label>Driver Name (Optional)</label>
+                        <input type="text" name="driver_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Driver Phone (Optional)</label>
+                        <input type="text" name="driver_phone" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Route Details (Optional)</label>
+                        <input type="text" name="route" class="form-control" placeholder="e.g. Westlands via Waiyaki Way">
+                    </div>
+                    <div class="form-group" style="display: flex; gap: 1rem;">
+                        <div style="flex:1;">
+                            <label>Capacity</label>
+                            <input type="number" name="capacity" class="form-control" min="0" value="0">
+                        </div>
+                        <div style="flex:1;">
+                            <label>Status</label>
+                            <select name="status" class="form-control">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px;">Save Bus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Edit Bus Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Edit Bus</h2>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="edit-bus-form">
+                    <input type="hidden" name="id" id="edit-id">
+                    <div class="form-group">
+                        <label>Bus Name / Tag</label>
+                        <input type="text" name="name" id="edit-name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Registration Number</label>
+                        <input type="text" name="registration_number" id="edit-registration_number" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Driver Name</label>
+                        <input type="text" name="driver_name" id="edit-driver_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Driver Phone</label>
+                        <input type="text" name="driver_phone" id="edit-driver_phone" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Route Details</label>
+                        <input type="text" name="route" id="edit-route" class="form-control">
+                    </div>
+                    <div class="form-group" style="display: flex; gap: 1rem;">
+                        <div style="flex:1;">
+                            <label>Capacity</label>
+                            <input type="number" name="capacity" id="edit-capacity" class="form-control" min="0">
+                        </div>
+                        <div style="flex:1;">
+                            <label>Status</label>
+                            <select name="status" id="edit-status" class="form-control">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px;">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Assign Students Modal -->
+    <div id="assign-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>Assign Students to Bus <span id="assign-bus-name" style="color:var(--primary);"></span></h2>
+                <span class="close" onclick="closeAssignModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">
+                    Select the students you want to assign to this bus.
+                </p>
+                <div style="margin-bottom: 1rem;">
+                    <input type="text" id="assign-search" class="form-control" placeholder="Search by name or admission number..." oninput="filterAssignStudents()">
+                </div>
+                <form id="assign-students-form">
+                    <input type="hidden" name="bus_id" id="assign-bus-id">
+                    
+                    <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.5rem;" id="assign-students-list">
+                        <!-- Student checklist populated via JS -->
+                        <div style="text-align:center; padding:2rem; color:var(--text-muted);">Loading eligible students...</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px;">Save Assignments</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
