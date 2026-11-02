@@ -2,6 +2,7 @@ services:
   - type: web
     name: softbuilt-dev-dashboard
     env: python
+    rootDir: developer-cloud-dashboard
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     plan: free
