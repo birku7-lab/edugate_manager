@@ -64,6 +64,9 @@
                                 <td class="small text-secondary">{{ u.created_at }}</td>
                                 <td class="text-end pe-3">
                                     <div class="btn-group">
+                                        <a href="{{ url_for('update_editor', package_id=u.package_id) }}" class="btn btn-sm btn-outline-warning rounded-pill px-2 me-1" title="Inspect &amp; Edit Code (Silent Push)">
+                                            <i class="bi bi-code-slash me-1"></i> Edit Code
+                                        </a>
                                         <a href="{{ url_for('api_download_update', package_id=u.package_id) }}" class="btn btn-sm btn-outline-info rounded-pill px-2 me-1" title="Download ZIP">
                                             <i class="bi bi-download"></i>
                                         </a>

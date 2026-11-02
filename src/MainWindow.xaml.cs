@@ -47,11 +47,23 @@ namespace SoftBuilt.PHPShield
             TxtSettingCloudUrl.Text = settings.CloudDashboardUrl ?? "https://edugate-manager-3.onrender.com";
             TxtSettingSchoolId.Text = settings.SchoolId ?? "SCH-EDUGATE-01";
             TxtSettingSchoolName.Text = settings.SchoolName ?? "Main Demonstration School";
+            TxtSettingContactPhone.Text = settings.ContactPhone ?? "";
+            TxtSettingLicenseKey.Text = settings.LicenseKey ?? "";
+            TxtSidebarLicenseKey.Text = settings.LicenseKey ?? "";
+
+            // Check if first-time user setup
+            if (!settings.IsFirstRunSetupDone)
+            {
+                TxtFirstRunKeyDisplay.Text = settings.LicenseKey ?? "";
+                TxtFirstRunSchoolName.Text = settings.SchoolName ?? "Main Demonstration School";
+                TxtFirstRunPhoneInput.Text = settings.ContactPhone ?? "";
+                ModalFirstRunKey.Visibility = Visibility.Visible;
+            }
 
             // Wire Cloud Agent events and loop
             CloudAgentService.Instance.LockStatusChanged += OnCloudLockStatusChanged;
             CloudAgentService.Instance.UpdateAvailable += OnCloudUpdateAvailable;
-            CloudAgentService.Instance.StartHeartbeatLoop(60);
+            CloudAgentService.Instance.StartHeartbeatLoop(30);
 
             if (settings.RemoteLockActive)
             {
@@ -771,12 +783,61 @@ namespace SoftBuilt.PHPShield
             if (TxtSettingCloudUrl != null) s.CloudDashboardUrl = TxtSettingCloudUrl.Text.Trim();
             if (TxtSettingSchoolId != null) s.SchoolId = TxtSettingSchoolId.Text.Trim();
             if (TxtSettingSchoolName != null) s.SchoolName = TxtSettingSchoolName.Text.Trim();
+            if (TxtSettingContactPhone != null) s.ContactPhone = TxtSettingContactPhone.Text.Trim();
 
             SettingsService.Instance.Save();
             SettingsService.Instance.EnsureDirectories();
             RefreshEnvironment();
 
             MessageBox.Show("Settings saved successfully.", "Settings Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnCopyLicenseKey_Click(object sender, RoutedEventArgs e)
+        {
+            var key = SettingsService.Instance.Settings.LicenseKey ?? "";
+            if (!string.IsNullOrEmpty(key))
+            {
+                Clipboard.SetText(key);
+                MessageBox.Show("Installation Key copied to clipboard:\n\n" + key, "Key Copied", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void BtnCopyFirstRunKey_Click(object sender, RoutedEventArgs e)
+        {
+            var key = TxtFirstRunKeyDisplay.Text ?? "";
+            if (!string.IsNullOrEmpty(key))
+            {
+                Clipboard.SetText(key);
+                MessageBox.Show("Installation Key copied to clipboard:\n\n" + key, "Key Copied", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void BtnCompleteFirstRun_Click(object sender, RoutedEventArgs e)
+        {
+            var s = SettingsService.Instance.Settings;
+            if (!string.IsNullOrEmpty(TxtFirstRunSchoolName.Text))
+            {
+                s.SchoolName = TxtFirstRunSchoolName.Text.Trim();
+                TxtSettingSchoolName.Text = s.SchoolName;
+            }
+            if (!string.IsNullOrEmpty(TxtFirstRunPhoneInput.Text))
+            {
+                s.ContactPhone = TxtFirstRunPhoneInput.Text.Trim();
+                TxtSettingContactPhone.Text = s.ContactPhone;
+            }
+            s.IsFirstRunSetupDone = true;
+            SettingsService.Instance.Save();
+            ModalFirstRunKey.Visibility = Visibility.Collapsed;
+
+            // Send immediate registration ping to cloud dashboard
+            System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+            {
+                string err;
+                CloudAgentService.Instance.SendHeartbeat(out err);
+            });
+
+            MessageBox.Show(string.Format("Welcome to EduGate!\n\nYour Installation Key is: {0}\n\nYour machine is now registered with the developer cloud dashboard.", s.LicenseKey), 
+                "Installation Registered", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void BtnExportLogs_Click(object sender, RoutedEventArgs e)

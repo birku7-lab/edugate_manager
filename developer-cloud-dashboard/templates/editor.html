@@ -1,0 +1,412 @@
+{% extends "base.html" %}
+
+{% block title %}Web Code Editor • {{ package.title }} • SoftBuilt Cloud Shield{% endblock %}
+
+{% block content %}
+<style>
+    .editor-container {
+        height: calc(100vh - 170px);
+        min-height: 620px;
+        background-color: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    .editor-topbar {
+        background-color: #161b22;
+        border-bottom: 1px solid #30363d;
+        padding: 8px 16px;
+    }
+    .file-tree-sidebar {
+        width: 280px;
+        background-color: #0d1117;
+        border-right: 1px solid #30363d;
+        overflow-y: auto;
+        font-size: 13px;
+    }
+    .file-tree-item {
+        padding: 5px 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        color: #c9d1d9;
+        text-decoration: none;
+        border-radius: 6px;
+        margin: 1px 6px;
+        transition: background 0.15s;
+    }
+    .file-tree-item:hover {
+        background-color: #21262d;
+        color: #58a6ff;
+    }
+    .file-tree-item.active {
+        background-color: #1f6feb33;
+        color: #58a6ff;
+        font-weight: 600;
+    }
+    .file-tree-dir {
+        font-weight: 600;
+        color: #8b949e;
+        padding: 6px 12px;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+    }
+    #codeEditor {
+        width: 100%;
+        height: 100%;
+        font-size: 14px;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    }
+    .editor-statusbar {
+        background-color: #161b22;
+        border-top: 1px solid #30363d;
+        padding: 6px 16px;
+        font-size: 12px;
+        color: #8b949e;
+    }
+</style>
+
+<!-- Header & Live Client Health Monitor -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ url_for('updates_list') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Back to Packages">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h4 class="fw-bold text-white mb-0">
+                <i class="bi bi-code-square text-warning me-2"></i>{{ package.title }}
+                <span class="badge bg-secondary-subtle text-light ms-1 fs-8">v{{ package.version }}</span>
+            </h4>
+        </div>
+        <p class="text-secondary small mb-0 mt-1">
+            Target: <strong>{{ package.target_school_id }}</strong> 
+            {% if school and school.contact_phone %}
+                • Phone: <span class="badge bg-dark border border-secondary text-light font-monospace">{{ school.contact_phone }}</span>
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Live Telemetry / Verification from Client PC -->
+    <div class="d-flex align-items-center gap-2">
+        <div id="liveClientHealthBox" class="p-2 px-3 rounded-pill border bg-dark text-light small d-flex align-items-center">
+            <span class="spinner-grow spinner-grow-sm text-info me-2" role="status"></span>
+            <span>Checking client deployment health...</span>
+        </div>
+
+        <button id="btnSaveFile" class="btn btn-secondary btn-sm rounded-pill px-3 shadow-sm" onclick="saveCurrentFile()">
+            <i class="bi bi-floppy me-1"></i> Save File
+        </button>
+        <button id="btnPushSync" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm fw-bold" onclick="pushSilentSync()">
+            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Push Silent Sync to User
+        </button>
+        <a href="{{ url_for('api_download_update', package_id=package.package_id) }}" class="btn btn-outline-info btn-sm rounded-pill px-3 shadow-sm" title="Download Repackaged ZIP">
+            <i class="bi bi-download me-1"></i> Download ZIP
+        </a>
+    </div>
+</div>
+
+<!-- Main Web IDE Window -->
+<div class="editor-container shadow-lg">
+    <!-- Topbar -->
+    <div class="editor-topbar d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-dark border border-secondary text-secondary font-monospace" id="currentFilePathDisplay">Select a file to edit</span>
+            <span id="unsavedBadge" class="badge bg-warning text-dark d-none">Unsaved Changes</span>
+        </div>
+        <div class="small text-secondary font-monospace" id="fileStats">
+            0 lines
+        </div>
+    </div>
+
+    <!-- Workspace Body -->
+    <div class="d-flex flex-grow-1 overflow-hidden">
+        <!-- File Tree -->
+        <div class="file-tree-sidebar p-2" id="fileTreeContainer">
+            <div class="text-center py-4 text-secondary small">
+                <div class="spinner-border spinner-border-sm mb-2" role="status"></div>
+                <div>Loading project files...</div>
+            </div>
+        </div>
+
+        <!-- Code Editor Area -->
+        <div class="flex-grow-1 position-relative">
+            <div id="codeEditor"></div>
+            <div id="editorEmptyState" class="position-absolute top-50 start-50 translate-middle text-center text-secondary">
+                <i class="bi bi-file-earmark-code fs-1 d-block mb-2 text-muted"></i>
+                <p class="mb-1 fw-semibold text-light">Select a file from the explorer on the left</p>
+                <span class="small">You can edit any PHP, HTML, JavaScript, CSS, SQL, or JSON file. Changes can be pushed silently to the user with one click.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="editor-statusbar d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <span><i class="bi bi-shield-check text-success me-1"></i>Zero-Downtime Silent Sync Mode</span>
+            <span id="editorStatusText" class="text-light">Ready</span>
+        </div>
+        <div id="clientStatusSummary" class="text-secondary">
+            Monitoring client: <code>{{ package.target_school_id }}</code>
+        </div>
+    </div>
+</div>
+
+<!-- ACE Editor CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js"></script>
+
+<script>
+    const packageId = "{{ package.package_id }}";
+    const targetSchoolId = "{{ package.target_school_id }}";
+    let activeFilePath = null;
+    let editor = null;
+    let fileModified = false;
+
+    // Initialize Ace Editor
+    function initEditor() {
+        editor = ace.edit("codeEditor");
+        editor.setTheme("ace/theme/one_dark");
+        editor.session.setMode("ace/mode/php");
+        editor.setShowPrintMargin(false);
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            tabSize: 4,
+            useSoftTabs: true
+        });
+
+        editor.on("change", () => {
+            if (activeFilePath && !fileModified) {
+                fileModified = true;
+                document.getElementById("unsavedBadge").classList.remove("d-none");
+            }
+            updateStats();
+        });
+
+        // Keyboard Shortcut: Ctrl+S to save
+        editor.commands.addCommand({
+            name: "save",
+            bindKey: {win: "Ctrl-S", mac: "Command-S"},
+            exec: function() {
+                saveCurrentFile();
+            }
+        });
+    }
+
+    function updateStats() {
+        if (!editor) return;
+        const count = editor.session.getLength();
+        document.getElementById("fileStats").innerText = `${count} lines`;
+    }
+
+    function getModeForExt(ext) {
+        switch (ext) {
+            case ".php": return "ace/mode/php";
+            case ".js": return "ace/mode/javascript";
+            case ".html": return "ace/mode/html";
+            case ".css": return "ace/mode/css";
+            case ".sql": return "ace/mode/sql";
+            case ".json": return "ace/mode/json";
+            case ".xml": return "ace/mode/xml";
+            case ".md": return "ace/mode/markdown";
+            default: return "ace/mode/text";
+        }
+    }
+
+    function getIconForExt(ext) {
+        switch (ext) {
+            case ".php": return '<i class="bi bi-filetype-php text-primary me-2"></i>';
+            case ".js": return '<i class="bi bi-filetype-js text-warning me-2"></i>';
+            case ".html": return '<i class="bi bi-filetype-html text-danger me-2"></i>';
+            case ".css": return '<i class="bi bi-filetype-css text-info me-2"></i>';
+            case ".sql": return '<i class="bi bi-filetype-sql text-success me-2"></i>';
+            case ".json": return '<i class="bi bi-filetype-json text-warning me-2"></i>';
+            default: return '<i class="bi bi-file-earmark-text text-secondary me-2"></i>';
+        }
+    }
+
+    // Load file tree
+    async function loadTree() {
+        try {
+            const res = await fetch(`/api/editor/${packageId}/tree`);
+            const data = await res.json();
+            const container = document.getElementById("fileTreeContainer");
+            container.innerHTML = "";
+
+            if (!data.root || data.root.length === 0) {
+                container.innerHTML = '<div class="text-center py-4 text-muted small">No files found in package.</div>';
+                return;
+            }
+
+            function renderNodes(nodes, depth = 0) {
+                nodes.forEach(node => {
+                    const pad = depth * 14;
+                    if (node.is_dir) {
+                        const dirDiv = document.createElement("div");
+                        dirDiv.className = "file-tree-dir";
+                        dirDiv.style.paddingLeft = `${pad + 8}px`;
+                        dirDiv.innerHTML = `<i class="bi bi-folder2-open text-warning me-2"></i>${node.name}`;
+                        container.appendChild(dirDiv);
+                        if (node.children) {
+                            renderNodes(node.children, depth + 1);
+                        }
+                    } else {
+                        const item = document.createElement("a");
+                        item.className = "file-tree-item";
+                        item.style.paddingLeft = `${pad + 12}px`;
+                        item.href = "#";
+                        item.innerHTML = `${getIconForExt(node.ext || '')}<span>${node.name}</span>`;
+                        item.onclick = (e) => {
+                            e.preventDefault();
+                            document.querySelectorAll(".file-tree-item").forEach(el => el.classList.remove("active"));
+                            item.classList.add("active");
+                            openFile(node.path, node.ext);
+                        };
+                        container.appendChild(item);
+                    }
+                });
+            }
+
+            renderNodes(data.root);
+        } catch (e) {
+            document.getElementById("fileTreeContainer").innerHTML = '<div class="text-danger small p-2">Failed to load file tree.</div>';
+        }
+    }
+
+    // Open file into editor
+    async function openFile(relPath, ext) {
+        if (fileModified) {
+            if (!confirm("You have unsaved changes in the current file. Discard and switch file?")) {
+                return;
+            }
+        }
+
+        document.getElementById("editorStatusText").innerText = `Opening ${relPath}...`;
+        try {
+            const res = await fetch(`/api/editor/${packageId}/file?path=${encodeURIComponent(relPath)}`);
+            const data = await res.json();
+            if (data.error) {
+                alert("Error opening file: " + data.error);
+                return;
+            }
+
+            document.getElementById("editorEmptyState").style.display = "none";
+            activeFilePath = relPath;
+            document.getElementById("currentFilePathDisplay").innerText = relPath;
+            editor.session.setMode(getModeForExt(ext));
+            editor.setValue(data.content, -1);
+            fileModified = false;
+            document.getElementById("unsavedBadge").classList.add("d-none");
+            document.getElementById("editorStatusText").innerText = `Opened: ${relPath}`;
+            updateStats();
+        } catch (e) {
+            alert("Network error opening file: " + e.message);
+        }
+    }
+
+    // Save current file
+    async function saveCurrentFile() {
+        if (!activeFilePath) return;
+        const content = editor.getValue();
+        document.getElementById("editorStatusText").innerText = `Saving ${activeFilePath}...`;
+
+        try {
+            const res = await fetch(`/api/editor/${packageId}/save_file`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({path: activeFilePath, content: content})
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+                fileModified = false;
+                document.getElementById("unsavedBadge").classList.add("d-none");
+                document.getElementById("editorStatusText").innerText = `✓ Saved ${activeFilePath}`;
+            } else {
+                alert("Save failed: " + (data.error || "Unknown error"));
+            }
+        } catch (e) {
+            alert("Error saving: " + e.message);
+        }
+    }
+
+    // Push silent sync
+    async function pushSilentSync() {
+        if (fileModified) {
+            await saveCurrentFile();
+        }
+
+        const btn = document.getElementById("btnPushSync");
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Packaging &amp; Pushing...';
+        document.getElementById("editorStatusText").innerText = "Repackaging update and pushing silent sync...";
+
+        try {
+            const res = await fetch(`/api/editor/${packageId}/push_sync`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({notes: `Pushed via Web Code Editor at ${new Date().toLocaleTimeString()}`})
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+                document.getElementById("editorStatusText").innerText = `✓ Pushed v${data.version}! Clients will silently sync.`;
+                alert(`🚀 Silent Sync Pushed!\n\n${data.message}\n\nThe client software will auto-download and deploy this fix without interrupting the user. Watch the Live Status indicator in the top right to verify when it is healthy!`);
+                pollClientHealth();
+            } else {
+                alert("Push failed: " + (data.error || "Unknown error"));
+            }
+        } catch (e) {
+            alert("Push error: " + e.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill me-1"></i> Push Silent Sync to User';
+        }
+    }
+
+    // Live health monitor polling from user side
+    async function pollClientHealth() {
+        const box = document.getElementById("liveClientHealthBox");
+        const summary = document.getElementById("clientStatusSummary");
+
+        try {
+            const schoolQuery = targetSchoolId === "ALL" ? "SCH-EDUGATE-01" : targetSchoolId;
+            const res = await fetch(`/api/school_health/${encodeURIComponent(schoolQuery)}`);
+            const data = await res.json();
+
+            if (!data.found) {
+                box.innerHTML = `<span class="badge bg-secondary me-2">Offline</span><span>Awaiting client connection...</span>`;
+                return;
+            }
+
+            const phoneStr = data.contact_phone ? ` • 📞 ${data.contact_phone}` : '';
+            summary.innerHTML = `Client: <strong>${data.school_name}</strong> (${data.school_id}${phoneStr}) • App: v${data.current_app_version}`;
+
+            if (data.http_health_status.includes("200") || data.http_health_status.includes("Healthy")) {
+                box.className = "p-2 px-3 rounded-pill border border-success-subtle bg-success-subtle text-success small d-flex align-items-center";
+                box.innerHTML = `<i class="bi bi-check-circle-fill text-success fs-6 me-2"></i><strong>Working on User PC:</strong>&nbsp;${data.http_health_status} (v${data.current_app_version})`;
+            } else if (data.last_sync_status.toLowerCase().includes("syncing")) {
+                box.className = "p-2 px-3 rounded-pill border border-warning-subtle bg-warning-subtle text-warning small d-flex align-items-center";
+                box.innerHTML = `<span class="spinner-border spinner-border-sm text-warning me-2"></span><strong>User PC Syncing:</strong>&nbsp;Downloading &amp; applying update...`;
+            } else if (data.last_sync_status.toLowerCase().includes("fail")) {
+                box.className = "p-2 px-3 rounded-pill border border-danger-subtle bg-danger-subtle text-danger small d-flex align-items-center";
+                box.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger fs-6 me-2"></i><strong>Deploy Error:</strong>&nbsp;${data.http_health_status}`;
+            } else {
+                box.className = "p-2 px-3 rounded-pill border bg-dark text-light small d-flex align-items-center";
+                box.innerHTML = `<i class="bi bi-check2 text-info me-2"></i><strong>Status:</strong>&nbsp;${data.http_health_status}`;
+            }
+        } catch (e) {
+            box.innerHTML = `<span class="text-secondary small">Monitoring paused</span>`;
+        }
+    }
+
+    // Boot
+    document.addEventListener("DOMContentLoaded", () => {
+        initEditor();
+        loadTree();
+        pollClientHealth();
+        // Live polling every 5 seconds so the developer sees if it works on the user's side
+        setInterval(pollClientHealth, 5000);
+    });
+</script>
+{% endblock %}

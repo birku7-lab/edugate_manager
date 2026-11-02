@@ -246,6 +246,15 @@ namespace SoftBuilt.PHPShield.Models
         public string CloudDashboardUrl { get; set; }
         public string SchoolId { get; set; }
         public string SchoolName { get; set; }
+        public string LicenseKey { get; set; }
+        public string ContactPhone { get; set; }
+        public bool IsFirstRunSetupDone { get; set; }
+        public string CurrentAppVersion { get; set; }
+        public string LastSyncStatus { get; set; }
+        public string LastSyncHealth { get; set; }
+        public string LastSyncTime { get; set; }
+        public string LastSyncMessage { get; set; }
+        public string DeployedPackageId { get; set; }
         public bool RemoteLockActive { get; set; }
         public string RemoteLockReason { get; set; }
 
@@ -272,6 +281,15 @@ namespace SoftBuilt.PHPShield.Models
             CloudDashboardUrl = "https://edugate-manager-3.onrender.com";
             SchoolId = "SCH-EDUGATE-01";
             SchoolName = "Main Demonstration School";
+            LicenseKey = "";
+            ContactPhone = "";
+            IsFirstRunSetupDone = false;
+            CurrentAppVersion = "1.0.0";
+            LastSyncStatus = "Ready";
+            LastSyncHealth = "Healthy (200 OK)";
+            LastSyncTime = "";
+            LastSyncMessage = "";
+            DeployedPackageId = "";
             RemoteLockActive = false;
             RemoteLockReason = "";
 

@@ -113,10 +113,15 @@ namespace SoftBuilt.PHPShield.Services
                 var payload = new
                 {
                     school_id = string.IsNullOrEmpty(settings.SchoolId) ? "SCH-EDUGATE-01" : settings.SchoolId.Trim(),
+                    license_key = settings.LicenseKey ?? "",
                     school_name = string.IsNullOrEmpty(settings.SchoolName) ? "EduGate Client" : settings.SchoolName.Trim(),
+                    contact_phone = settings.ContactPhone ?? "",
                     machine_id = GetMachineFingerprint(),
                     shield_version = "1.0.0",
-                    current_app_version = "1.0.0"
+                    current_app_version = settings.CurrentAppVersion ?? "1.0.0",
+                    last_sync_status = settings.LastSyncStatus ?? "Ready",
+                    http_health_status = settings.LastSyncHealth ?? "Healthy (200 OK)",
+                    last_sync_time = settings.LastSyncTime ?? ""
                 };
 
                 string jsonStr = _json.Serialize(payload);
@@ -166,6 +171,12 @@ namespace SoftBuilt.PHPShield.Services
                             {
                                 UpdateAvailable(result.update);
                             }
+
+                            // Automatically & silently sync update in background if new version or package
+                            if (result.update.package_id != settings.DeployedPackageId || result.update.version != settings.CurrentAppVersion)
+                            {
+                                TriggerSilentSyncAsync(result.update);
+                            }
                         }
                     }
 
@@ -176,6 +187,166 @@ namespace SoftBuilt.PHPShield.Services
             {
                 errorMessage = ex.Message;
                 return null;
+            }
+        }
+
+        private readonly object _syncLock = new object();
+        private bool _isSyncing = false;
+
+        public void TriggerSilentSyncAsync(CloudUpdatePayload update)
+        {
+            if (update == null || string.IsNullOrEmpty(update.download_url)) return;
+
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                lock (_syncLock)
+                {
+                    if (_isSyncing) return;
+                    _isSyncing = true;
+                }
+
+                try
+                {
+                    PerformSilentSync(update);
+                }
+                finally
+                {
+                    lock (_syncLock)
+                    {
+                        _isSyncing = false;
+                    }
+                }
+            });
+        }
+
+        private void PerformSilentSync(CloudUpdatePayload update)
+        {
+            var settings = SettingsService.Instance.Settings;
+            AuditLogService.Instance.Log("SYNC", "Silent Sync Starting", string.Format("Auto-downloading and applying update '{0}' (v{1}) from cloud...", update.title, update.version), true);
+
+            SendSyncReport(settings.SchoolId, settings.LicenseKey, update.package_id, update.version, "syncing", "Downloading update package...", "Silent sync in progress");
+
+            string tempZipPath = Path.Combine(StorageManager.StagingDirectory, "update_" + update.package_id + ".zip");
+            string dlErr;
+            if (!DownloadUpdateZip(update.download_url, tempZipPath, out dlErr))
+            {
+                settings.LastSyncStatus = "Failed";
+                settings.LastSyncHealth = "Download Failed";
+                settings.LastSyncMessage = dlErr;
+                settings.LastSyncTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+                SettingsService.Instance.Save();
+
+                SendSyncReport(settings.SchoolId, settings.LicenseKey, update.package_id, update.version, "failed", "Download Failed", dlErr);
+                AuditLogService.Instance.Log("SYNC", "Silent Sync Download Error", dlErr, false);
+                return;
+            }
+
+            try
+            {
+                SendSyncReport(settings.SchoolId, settings.LicenseKey, update.package_id, update.version, "syncing", "Staging & Obfuscating...", "Unpacking and hardening package");
+
+                // 1. Unpack & validate ZIP safely
+                var project = new ProjectImportService().ImportZip(tempZipPath, "EduGate_" + update.version, update.version);
+
+                // 2. Build production package
+                var buildProfile = new BuildProfile();
+                var buildRecord = BuildService.Instance.CreateProductionBuild(project, buildProfile);
+
+                // 3. Detect XAMPP
+                var xampp = XamppDetectorService.Instance.Detect(settings.XamppPath);
+                if (xampp == null || !xampp.IsDetected)
+                {
+                    throw new InvalidOperationException("XAMPP installation not detected on client machine at: " + settings.XamppPath);
+                }
+
+                SendSyncReport(settings.SchoolId, settings.LicenseKey, update.package_id, update.version, "syncing", "Deploying & Testing HTTP...", "Activating Apache release");
+
+                // 4. Deploy release atomically
+                var deployRecord = DeploymentService.Instance.Deploy(xampp, buildRecord, "edugate", settings.EnableLan, settings.LanSubnet, msg =>
+                {
+                    // silent logging
+                });
+
+                if (deployRecord != null && deployRecord.VerificationPassed)
+                {
+                    settings.CurrentAppVersion = update.version;
+                    settings.DeployedPackageId = update.package_id;
+                    settings.LastSyncStatus = "Success";
+                    settings.LastSyncHealth = "200 OK - Verified Healthy";
+                    settings.LastSyncTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+                    settings.LastSyncMessage = string.Format("Package '{0}' v{1} deployed silently & verified healthy.", update.title, update.version);
+                    SettingsService.Instance.Save();
+
+                    SendSyncReport(settings.SchoolId, settings.LicenseKey, update.package_id, update.version, "success", "200 OK - Healthy", settings.LastSyncMessage);
+                    AuditLogService.Instance.Log("SYNC", "Silent Sync Complete", settings.LastSyncMessage, true);
+                }
+                else
+                {
+                    string vSummary = deployRecord != null ? deployRecord.VerificationSummary : "Verification checks did not pass.";
+                    throw new InvalidOperationException("Deployment verification failed: " + vSummary);
+                }
+            }
+            catch (Exception ex)
+            {
+                settings.LastSyncStatus = "Failed";
+                settings.LastSyncHealth = "Deploy Failed: " + ex.Message;
+                settings.LastSyncMessage = ex.ToString();
+                settings.LastSyncTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+                SettingsService.Instance.Save();
+
+                SendSyncReport(settings.SchoolId, settings.LicenseKey, update.package_id, update.version, "failed", "Deploy Error: " + ex.Message, ex.ToString());
+                AuditLogService.Instance.Log("SYNC", "Silent Sync Failed", ex.Message, false);
+            }
+            finally
+            {
+                try { if (File.Exists(tempZipPath)) File.Delete(tempZipPath); } catch { }
+            }
+        }
+
+        public bool SendSyncReport(string schoolId, string licenseKey, string packageId, string version, string status, string healthStatus, string message, string details = "")
+        {
+            try
+            {
+                var settings = SettingsService.Instance.Settings;
+                string cloudUrl = settings.CloudDashboardUrl;
+                if (string.IsNullOrEmpty(cloudUrl)) return false;
+
+                string endpoint = cloudUrl.TrimEnd('/') + "/api/sync_report";
+                var payload = new
+                {
+                    school_id = schoolId ?? "",
+                    license_key = licenseKey ?? "",
+                    package_id = packageId ?? "",
+                    version = version ?? "",
+                    status = status ?? "unknown",
+                    health_status = healthStatus ?? "",
+                    message = message ?? "",
+                    details = details ?? "",
+                    machine_id = GetMachineFingerprint()
+                };
+
+                string jsonStr = _json.Serialize(payload);
+                byte[] data = Encoding.UTF8.GetBytes(jsonStr);
+
+                var req = (HttpWebRequest)WebRequest.Create(endpoint);
+                req.Method = "POST";
+                req.ContentType = "application/json";
+                req.Timeout = 12000;
+                req.ContentLength = data.Length;
+
+                using (var stream = req.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+
+                using (var resp = (HttpWebResponse)req.GetResponse())
+                {
+                    return resp.StatusCode == HttpStatusCode.OK;
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -191,6 +362,7 @@ namespace SoftBuilt.PHPShield.Services
                 var payload = new
                 {
                     school_id = string.IsNullOrEmpty(settings.SchoolId) ? "SCH-UNKNOWN" : settings.SchoolId.Trim(),
+                    license_key = settings.LicenseKey ?? "",
                     error_type = errorType ?? "Exception",
                     message = message ?? "Unknown error",
                     stack_trace = stackTrace ?? "",

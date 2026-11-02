@@ -92,6 +92,21 @@
                             <TextBlock x:Name="TxtSidebarTargetProject" Text="EduGate (Pending Import)" FontSize="11" FontWeight="SemiBold" Foreground="#38BDF8"/>
                         </StackPanel>
                     </Border>
+
+                    <!-- Installation Key Pill -->
+                    <Border Background="#0F172A" BorderBrush="#1E3A8A" BorderThickness="1" CornerRadius="6" Padding="8,6" Margin="0,8,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="Installation Key:" FontSize="10" Foreground="#64748B"/>
+                                <TextBlock x:Name="TxtSidebarLicenseKey" Text="EDUGATE-KEY" FontSize="11" FontWeight="Bold" FontFamily="Consolas" Foreground="#60A5FA" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" Content="📋" ToolTip="Copy Installation Key" Click="BtnCopyLicenseKey_Click" Background="Transparent" Foreground="#93C5FD" BorderThickness="0" Cursor="Hand" Padding="4,2"/>
+                        </Grid>
+                    </Border>
                 </StackPanel>
 
                 <!-- Navigation Menu -->
@@ -790,6 +805,26 @@
                                     <TextBox x:Name="TxtSettingSchoolName" Grid.Column="1" Text="Main Demonstration School"/>
                                 </Grid>
 
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Contact Phone Number:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtSettingContactPhone" Grid.Column="1" Text="+256 700 000000"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Installation / License Key:" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="TxtSettingLicenseKey" Grid.Column="1" Text="EDUGATE-KEY" IsReadOnly="True" Background="#111827" FontFamily="Consolas" FontWeight="Bold" Foreground="#60A5FA"/>
+                                    <Button Grid.Column="2" Content="📋 Copy" Style="{StaticResource SecondaryButton}" Click="BtnCopyLicenseKey_Click" Margin="8,0,0,0" Padding="10,4"/>
+                                </Grid>
+
                                 <Grid Margin="0,0,0,16">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -1154,6 +1189,46 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button Content="🔄 Check Status / Refresh Lock" Style="{StaticResource SuccessButton}" Click="BtnRefreshRemoteLock_Click" Padding="18,10" Margin="0,0,12,0" FontSize="13" FontWeight="Bold"/>
                         <Button Content="🛠️ Developer Override" Style="{StaticResource SecondaryButton}" Click="BtnRemoteLockDevOverride_Click" Padding="14,10" FontSize="12"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ================= NEW INSTALLATION / ACTIVATION KEY MODAL ================= -->
+        <Grid x:Name="ModalFirstRunKey" Grid.Column="0" Grid.ColumnSpan="2" Background="#F2000000" Visibility="Collapsed">
+            <Border Background="#111827" BorderBrush="#3B82F6" BorderThickness="2" CornerRadius="16" Width="550" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="32">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Border Width="48" Height="48" Background="#1E3A8A" CornerRadius="12" Margin="0,0,14,0">
+                            <TextBlock Text="🔑" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Welcome to SoftBuilt Shield" FontSize="18" FontWeight="Bold" Foreground="#FFFFFF"/>
+                            <TextBlock Text="Your Unique Machine &amp; Activation Key" FontSize="12" Foreground="#94A3B8"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock Text="Your installation has been assigned a unique Activation Key. Share this key or your phone number with your developer/admin so they can manage your deployment and push silent updates." FontSize="12" Foreground="#CBD5E1" TextWrapping="Wrap" Margin="0,0,0,16"/>
+
+                    <Border Background="#0F172A" BorderBrush="#2563EB" BorderThickness="1.5" CornerRadius="10" Padding="14,12" Margin="0,0,0,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="TxtFirstRunKeyDisplay" Grid.Column="0" IsReadOnly="True" Background="Transparent" Foreground="#60A5FA" BorderThickness="0" FontSize="18" FontWeight="Bold" FontFamily="Consolas, monospace" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Content="📋 Copy Key" Style="{StaticResource PrimaryButton}" Click="BtnCopyFirstRunKey_Click" Padding="12,6" FontSize="12"/>
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Text="School or Client Name:" FontSize="12" FontWeight="SemiBold" Foreground="#E2E8F0" Margin="0,0,0,6"/>
+                    <TextBox x:Name="TxtFirstRunSchoolName" Background="#1E293B" Foreground="#FFFFFF" BorderBrush="#334155" Padding="8,8" FontSize="13" Margin="0,0,0,14"/>
+
+                    <TextBlock Text="Contact Phone Number (For SMS / WhatsApp System Alerts):" FontSize="12" FontWeight="SemiBold" Foreground="#E2E8F0" Margin="0,0,0,6"/>
+                    <TextBox x:Name="TxtFirstRunPhoneInput" Background="#1E293B" Foreground="#FFFFFF" BorderBrush="#334155" Padding="8,8" FontSize="13" Margin="0,0,0,20"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="🚀 Activate &amp; Open Software" Style="{StaticResource SuccessButton}" Click="BtnCompleteFirstRun_Click" Padding="20,10" FontSize="13" FontWeight="Bold"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

@@ -67,8 +67,34 @@ namespace SoftBuilt.PHPShield.Services
                     Settings.SchoolName = "Main Demonstration School";
                     dirty = true;
                 }
+                if (string.IsNullOrEmpty(Settings.LicenseKey))
+                {
+                    Settings.LicenseKey = GenerateLicenseKey();
+                    dirty = true;
+                }
+                if (string.IsNullOrEmpty(Settings.CurrentAppVersion))
+                {
+                    Settings.CurrentAppVersion = "1.0.0";
+                    dirty = true;
+                }
                 if (dirty) Save();
             }
+        }
+
+        public static string GenerateLicenseKey()
+        {
+            var rng = new Random();
+            const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            char[] p1 = new char[4];
+            char[] p2 = new char[4];
+            char[] p3 = new char[4];
+            for (int i = 0; i < 4; i++)
+            {
+                p1[i] = chars[rng.Next(chars.Length)];
+                p2[i] = chars[rng.Next(chars.Length)];
+                p3[i] = chars[rng.Next(chars.Length)];
+            }
+            return string.Format("EDUGATE-{0}-{1}-{2}", new string(p1), new string(p2), new string(p3));
         }
 
         public void Save()

@@ -104,9 +104,10 @@
                         <thead class="table-dark-header">
                             <tr>
                                 <th class="ps-3">School Name</th>
-                                <th>School ID</th>
+                                <th>Key / ID</th>
+                                <th>Phone Number</th>
+                                <th>Deployment Health</th>
                                 <th>Status</th>
-                                <th>Shield Version</th>
                                 <th>Last Ping</th>
                                 <th class="text-end pe-3">Action</th>
                             </tr>
@@ -116,9 +117,35 @@
                             <tr>
                                 <td class="ps-3">
                                     <div class="fw-semibold text-white">{{ s.school_name }}</div>
-                                    <div class="text-secondary fs-8">{{ s.contact_name or 'N/A' }} • {{ s.contact_phone or '' }}</div>
+                                    <div class="text-secondary fs-8">{{ s.contact_name or 'Administrator' }}</div>
                                 </td>
-                                <td><code>{{ s.school_id }}</code></td>
+                                <td><code class="text-info fs-8">{{ s.license_key or s.school_id }}</code></td>
+                                <td>
+                                    {% if s.contact_phone %}
+                                        <span class="badge bg-dark border border-secondary text-light font-monospace">
+                                            <i class="bi bi-telephone text-success me-1"></i>{{ s.contact_phone }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted fs-8">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if '200' in (s.http_health_status or '') or 'Healthy' in (s.http_health_status or '') %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                            <i class="bi bi-check2-circle me-1"></i>{{ s.http_health_status }}
+                                        </span>
+                                    {% elif 'syncing' in (s.last_sync_status or '').lower() %}
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">
+                                            <span class="spinner-border spinner-border-sm me-1"></span>Syncing...
+                                        </span>
+                                    {% elif 'fail' in (s.last_sync_status or '').lower() or 'error' in (s.http_health_status or '').lower() %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">
+                                            <i class="bi bi-exclamation-octagon me-1"></i>{{ s.http_health_status or 'Failed' }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-light">{{ s.http_health_status or 'Ready' }}</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     {% if s.status == 'active' %}
                                         <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Active</span>
@@ -126,7 +153,6 @@
                                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">🔒 Locked</span>
                                     {% endif %}
                                 </td>
-                                <td><span class="badge bg-secondary-subtle text-secondary">{{ s.shield_version }}</span></td>
                                 <td class="text-secondary small">{{ s.last_heartbeat or 'Never' }}</td>
                                 <td class="text-end pe-3">
                                     <button class="btn btn-sm {% if s.status == 'active' %}btn-outline-danger{% else %}btn-outline-success{% endif %} rounded-pill px-2 py-1"
